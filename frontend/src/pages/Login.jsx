@@ -1,53 +1,48 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import { loginUserApi } from "../services/api";
+import { useState } from 'react'
+import toast from 'react-hot-toast';
+import { jwtDecode } from 'jwt-decode';
+import { loginUserApi } from '../services/api';
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  });
+function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+    const submit = async (e) => {
+        if (!email || !password) {
+            return toast.error("please enter all fields")
+        }
+        const formdata = {
+            email: email, password: password
+        }
+        try {
 
-  const validate = () => {
-    if (!formData.email.trim()) {
-      toast.error("Email is required");
-      return false;
+            const response = await loginUserApi(formdata);
+            if (!response?.data?.success) {
+                return toast.error(response?.data?.message);
+            }
+            localStorage.setItem("token-37c", response?.data?.token)
+                // localStorage.setItem("user", JSON.stringify(response?.data?.user))
+            toast.success(response?.data?.message)
+            let decoded;
+            try {
+                decoded = jwtDecode(response?.data?.token);
+            } catch {
+                return toast.error("Invalid token");
+            }
+
+            if (decoded.role === "admin") {
+                navigate("/admindash");
+            } else {
+                navigate("/userdash");
+            }
+
+        }
+        catch (err) {
+            return toast.error(err?.response?.data?.message)
+        }
     }
-
-    if (!formData.password) {
-      toast.error("Password is required");
-      return false;
-    }
-
-    return true;
-  };
-
-  // 🔥 async submit (sir-style)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
-    try {
-      const response = await loginUserApi(formData);
-      if(response?.data?.success){
-        return toast.error(response?.data?.message);
-      }
-      toast.success(response?.data?.message);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login failed"
-      );
-    }
-  };
 
   return (
     <div style={styles.container}>

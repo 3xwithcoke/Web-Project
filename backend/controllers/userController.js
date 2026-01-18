@@ -2,69 +2,62 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+
 const addUser = async (req, res) => {
-  console.log("Request Body:", req.body); // Debugging line
   try {
     const { username, email, password } = req.body;
+
     if (!username || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
-    }
-    const isUser = await User.findOne({ where: { username } });
-    const isemail = await User.findOne({ where: { email } });
-    if (isUser || isemail) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const hassed = await bcrypt.hash(password, 10);
-    console.log(hassed);
+    const existingUser = await User.findOne({
+      where: { email },
+    });
+
+    const existingUsername = await User.findOne({
+      where: { username },
+    });
+
+    if (existingUser || existingUsername) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       username,
       email,
-      password: hassed,
+      password: hashedPassword,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User added successfully",
-      user: newUser,
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+      },
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error adding user",
       error: error.message,
     });
   }
 };
 
+
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll({ attributes: { exclude: ["password"] } });
-    res.status(200).json({ message: "Users retrieved successfully", users });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error retrieving users",
-      error: error.message,
+    const users = await User.findAll({
+      attributes: { exclude: ["password"] },
     });
-  }
-};
 
-const getUserById = async (req, res) => {
-  try {
-    const id = req.params.id
-    const users = await User.findByPk(id)
-    if(!users){
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-    return res.json({
-      user: { id: users.id, name: users.username },
+    return res.status(200).json({
       message: "Users retrieved successfully",
+      users,
     });
   } catch (error) {
     return res.status(500).json({
@@ -74,43 +67,84 @@ const getUserById = async (req, res) => {
   }
 };
 
-const updateUser=async(req,res)=>{
-    try{
-        const {id}=req.params;
-        const {username,email,password}=req.body;
-        const user=await User.findByPk(id);
-        if(!user){
-            return res.status(404).json({message:"User not found"});
-        }
-        if (username) {
-            const existingUser = await User.findOne({ where: { username } });
-            if (existingUser && existingUser.id !== user.id) {
-                return res.status(400).json({ 
-                    message: "Username already taken",})
-            }
-        }
-        let hassedPassword=user.password;
-        if(password){
-            hassedPassword=await bcrypt.hash(password,10);
-        }
-        await user.update({
-            username : username || user.username,
-            email : email || user.email,
-            password:hassedPassword
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-        });
-        res.json({message:"User updated successfully",user});
-    }catch(error){
-        return res.status(500).json ({
-            message : "error updating user",
-            error : error.message,
-        });
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-}
 
-const getActiveUsers = async (req, res) => {
-  res.json({ message: "Get active users - to be implemented" });
+    return res.status(200).json({
+      message: "User retrieved successfully",
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error retrieving user",
+      error: error.message,
+    });
+  }
 };
+
+
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, email, password } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check username uniqueness
+    if (username) {
+      const existingUsername = await User.findOne({ where: { username } });
+      if (existingUsername && existingUsername.id !== user.id) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+    }
+
+    // Check email uniqueness
+    if (email) {
+      const existingEmail = await User.findOne({ where: { email } });
+      if (existingEmail && existingEmail.id !== user.id) {
+        return res.status(400).json({ message: "Email already taken" });
+      }
+    }
+
+    let hashedPassword = user.password;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    await user.update({
+      username: username || user.username,
+      email: email || user.email,
+      password: hashedPassword,
+    });
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error updating user",
+      error: error.message,
+    });
+  }
+};
+
 
 const deleteUser = async (req, res) => {
   try {
@@ -118,9 +152,7 @@ const deleteUser = async (req, res) => {
 
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     await user.destroy();
@@ -147,28 +179,24 @@ const loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ where: { email } });
-
     if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
+
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
-    )
+    );
 
     return res.status(200).json({
       message: "Login successful",
+      token,
       user: {
         id: user.id,
         username: user.username,
@@ -183,5 +211,38 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getMe = async (req, res) => {
+  try {
+    const { id } = req.user;
 
-module.exports = { addUser, getAllUsers, getActiveUsers, getUserById , updateUser, deleteUser, loginUser};
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User retrieved successfully",
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching user",
+      error: error.message,
+    });
+  }
+};
+
+const getActiveUsers = async (req, res) => {
+  res.json({ message: "Get active users - to be implemented" });
+};
+
+module.exports = {
+  addUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  loginUser,
+  getMe,
+  getActiveUsers,
+};

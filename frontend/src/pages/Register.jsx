@@ -1,47 +1,53 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
+import React, { useState } from "react";
+import toast from 'react-hot-toast';
 import { createUserApi } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
+ const navigate = useNavigate(); 
+ const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    address: "",
+    phoneNumber: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const validate = () => {
-    if (!formData.username.trim()) {
+    if (!formData.username) {
       toast.error("Username is required");
       return false;
     }
-    if (!formData.email.trim()) {
+
+    if (!formData.email) {
       toast.error("Email is required");
       return false;
     }
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      toast.error("Invalid email address");
-      return false;
-    }
+
     if (!formData.password) {
       toast.error("Password is required");
       return false;
     }
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return false;
-    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       return false;
     }
+
+    if (!formData.phoneNumber.trim()){
+      toast.error("Phone number is required");
+      return false;
+    }
+
     return true;
   };
 
@@ -49,176 +55,134 @@ const Register = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    try {
+    setLoading(true);
+
+  try {
       const dataToSubmit = {
         username: formData.username,
         email: formData.email,
-        password: formData.password
-      }
-      const response = await createUserApi(dataToSubmit); 
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber,
+  };
+  const response = await createUserApi(dataToSubmit);
+
       if (response.data.success) {
-        toast.success(response?.data?.message || 'Registration successful');
-        setFormData({ username: "", email: "", password: "", confirmPassword: "" });
+        toast.success("User registered successfully!");
+        navigate("/login")
       } else {
-        toast.error('Something went wrong');
+        toast.error("User registration failed");
       }
     } catch (error) {
-      toast.error("Server error. Try again later.");
-      console.error(error);
+      console.error("API call error:", error);
+  if (error.response && error.response.data && error.response.data.message) {
+    toast.error(error.response.data.message);
+  } else if (error.message) {
+    toast.error(error.message);
+  } else {
+      toast.error("Something went wrong");
+    }
+  }finally{
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.glowBox}></div>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>IDENTITY <span style={{color: '#fff'}}>CORE</span></h2>
-          <div style={styles.divider}></div>
-        </div>
+     <div className="flex min-h-screen">
+      <div className="flex-1 bg-gray-900 text-white flex flex-col justify-center items-center p-10">
+        <h1 className="text-4xl font-bold mb-6 text-center">
+            Manage your beauty
+          </h1>
+          <p className="text-center mb-10">
+            Global beauty solutions made simple.
+          </p>
 
-        <div style={styles.inputWrapper}>
-          <input
-            type="text"
-            name="username"
-            placeholder="USERNAME"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            style={styles.input}
+          <img
+            src="/src/assets/bg.jpg"
+            alt="Beauty App"
+            className="w-72 md:w-96"
           />
         </div>
 
-        <div style={styles.inputWrapper}>
-          <input
-            type="email"
-            name="email"
-            placeholder="EMAIL ADDRESS"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </div>
+        <div className="flex-1 flex flex-col justify-center items-center p-10 bg-white rounded-l-3xl shadow-lg">
+        <div className="w-full max-w-md">
+          <h2 className="text-3xl font-semibold mb-6">Create Account</h2>
 
-        <div style={styles.inputWrapper}>
-          <input
-            type="password"
-            name="password"
-            placeholder="PASSWORD"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="username"
+              placeholder="Full Name"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
 
-        <div style={styles.inputWrapper}>
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="CONFIRM PASSWORD"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
-        </div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
 
-        <button 
-          type="submit" 
-          style={styles.button}
-          onMouseOver={(e) => {
-            e.target.style.background = "#fff";
-            e.target.style.color = "#000";
-            e.target.style.boxShadow = "0 0 20px rgba(255,255,255,0.6)";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = "transparent";
-            e.target.style.color = "#fff";
-            e.target.style.boxShadow = "none";
-          }}
-        >
-          INITIALIZE REGISTRATION
-        </button>
-      </form>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
+
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
+           
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
+
+            <input
+              type="text"
+              name="phoneNumber"
+              placeholder="Phone Number"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-pink-500 to-pink-400 text-white py-3 rounded-lg hover:opacity-90 transition"
+            >
+               {loading ? "Creating Account..." : "Create Account"}
+            </button>
+          </form>
+
+          <p className="text-sm text-gray-500 mt-6">
+            Already have an account?{" "}
+            <a href="/login" className="text-pink-500 hover:underline">
+              Sign In
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#000", // Rich Black
-    position: "relative",
-    overflow: "hidden",
-    fontFamily: "'Courier New', Courier, monospace", // Monospace for tech feel
-  },
-  glowBox: {
-    position: "absolute",
-    width: "400px",
-    height: "400px",
-    background: "radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 70%)",
-    zIndex: 0,
-  },
-  form: {
-    width: "380px",
-    padding: "40px",
-    background: "rgba(10, 10, 10, 0.8)",
-    border: "1px solid #222",
-    backdropFilter: "blur(10px)",
-    zIndex: 1,
-    position: "relative",
-  },
-  header: {
-    marginBottom: "40px",
-    textAlign: "left",
-  },
-  title: {
-    color: "#444",
-    fontSize: "18px",
-    fontWeight: "900",
-    letterSpacing: "5px",
-    margin: 0,
-  },
-  divider: {
-    width: "40px",
-    height: "2px",
-    background: "#fff",
-    marginTop: "10px",
-  },
-  inputWrapper: {
-    marginBottom: "25px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px 0px",
-    background: "transparent",
-    border: "none",
-    borderBottom: "1px solid #333",
-    color: "#fff",
-    outline: "none",
-    fontSize: "12px",
-    letterSpacing: "2px",
-    transition: "all 0.4s ease",
-    boxSizing: "border-box"
-  },
-  button: {
-    width: "100%",
-    padding: "15px",
-    marginTop: "20px",
-    background: "transparent",
-    color: "#fff",
-    border: "1px solid #fff",
-    fontWeight: "bold",
-    fontSize: "11px",
-    letterSpacing: "3px",
-    cursor: "pointer",
-    transition: "all 0.3s cubic-bezier(0.19, 1, 0.22, 1)",
-  },
 };
 
 export default Register;

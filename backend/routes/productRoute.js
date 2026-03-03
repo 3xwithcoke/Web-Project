@@ -1,16 +1,24 @@
-const express = require("express");
-const router = express.Router();
+
+const { getAllProducts, getCategories,getProductDetails,getRelatedProducts, getProductsByCategory, updateProduct, deleteProduct, getSingleProduct, addProduct, getSuggestedProducts} = require("../controllers/productController");
+const { searchProducts } = require("../controllers/searchController");
+
+const express = require("express").Router();
 const uploadProductImages = require("../helpers/multer");
-const authGuard = require("../helpers/authguagrd");
 const isAdmin = require("../helpers/isAdmin");
-const {
-    addProduct,
-    updateProduct,
-    getAllProducts,
-} = require("../controllers/productController");
+const authGuard = require("../helpers/authGuard");
 
-router.get("/getProduct", getAllProducts);
-router.post("/addProduct",authGuard,isAdmin, uploadProductImages, addProduct);
-router.put("/updateProduct/:id",authGuard,isAdmin, uploadProductImages, updateProduct);
+express.get("/relatedproducts", getRelatedProducts);
+express.post("/addproduct",authGuard,isAdmin,uploadProductImages,addProduct);
+express.get("/productdetails/:id", getProductDetails);
 
-module.exports = router;
+
+express.get("/search", searchProducts)
+
+express.get("/getallproducts", getAllProducts)
+express.get("/getcategories", getCategories)
+express.get("/getproductsbycategory/:category", getProductsByCategory);
+
+express.put("/updateProduct/:id",authGuard,isAdmin,uploadProductImages,updateProduct);
+express.delete("/deleteproduct/:id",authGuard,isAdmin, deleteProduct)
+
+module.exports = express;

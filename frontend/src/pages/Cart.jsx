@@ -85,9 +85,10 @@ export default function Cart() {
                 >
                   <div className="w-full md:w-48 aspect-square bg-gray-950 overflow-hidden">
                     <img
-                      src={`${import.meta.env.VITE_API_BASE_URL}${item.Product.thumbnail}`}
+                      src={item.Product.thumbnail || `${import.meta.env.VITE_API_BASE_URL}/placeholder.jpg`}
                       alt={item.Product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+                      onError={(e) => (e.target.src = `${import.meta.env.VITE_API_BASE_URL}/placeholder.jpg`)}
                     />
                   </div>
 

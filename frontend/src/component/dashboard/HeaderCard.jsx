@@ -6,7 +6,6 @@ import {
   FaHeart,
   FaBoxOpen,
   FaShoppingCart,
-  FaTruck,
   FaSignOutAlt,
   FaTrash,
   FaKey,
@@ -75,7 +74,6 @@ const HeaderCard = () => {
           { to: "/wishlist", icon: <FaHeart />, label: "Wishlist" },
           { to: "/orders", icon: <FaBoxOpen />, label: "Orders" },
           { to: "/viewcart", icon: <FaShoppingCart />, label: "Cart" },
-          { to: "/shipping", icon: <FaTruck />, label: "Shipping" },
         ].map((item) => (
           <Link 
             key={item.label}

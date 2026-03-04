@@ -73,7 +73,7 @@ const ViewProductList = () => {
         <div className="flex flex-col md:flex-row justify-between items-end border-b border-gray-900 pb-8 gap-8">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tight italic">
-              {category ? `${category.split('-').join(' ')} Collection` : "The Entire Collection"}
+              {category ? `${category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Collection` : "The Entire Collection"}
             </h1>
             <div className="w-24 h-[1px] bg-gray-900"></div>
             <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600">

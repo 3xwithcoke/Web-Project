@@ -41,7 +41,7 @@ app.get("/", (req, res) => {
 const startServer = async () => {
     try {
         await connectDB();
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ force: false });
         // Using port 8000 to avoid common macOS conflicts
         app.listen(8000, () => {
             console.log(`Server is running on port 8000`);

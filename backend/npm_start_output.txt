@@ -1,5 +1,0 @@
-
-> backend@1.0.0 start
-> nodemon index.js
-
-sh: nodemon: command not found

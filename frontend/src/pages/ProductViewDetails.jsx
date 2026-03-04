@@ -88,8 +88,8 @@ const ProductViewDetails = () => {
 
   const stockCount = product.stock;
   const images = (Array.isArray(product.images) && product.images.length > 0) 
-    ? product.images 
-    : [product.thumbnail];
+    ? product.images.map(img => img.startsWith('http') ? img : `${import.meta.env.VITE_API_BASE_URL}${img}`) 
+    : [product.thumbnail.startsWith('http') ? product.thumbnail : `${import.meta.env.VITE_API_BASE_URL}${product.thumbnail}`];
 
   const specs = [
     { label: "Brand", value: product.brand },

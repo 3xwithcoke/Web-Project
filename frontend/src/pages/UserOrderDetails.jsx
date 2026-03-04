@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getOrderDetailsApi } from "../services/api";
+import HeaderCard from "../component/dashboard/HeaderCard";
 
 const UserOrderDetails = () => {
   const { id: orderId } = useParams(); 
@@ -17,10 +18,10 @@ const UserOrderDetails = () => {
         if (res.data.success) {
           setOrder(res.data.data);
         } else {
-          toast.error(res.data.message);
+          toast.error(res.data.message || "Archive not found");
         }
       } catch (err) {
-        toast.error("Unable to fetch order details");
+        toast.error("Unable to fetch acquisition details");
         console.error(err);
       } finally {
         setLoading(false);
@@ -30,73 +31,124 @@ const UserOrderDetails = () => {
     if (orderId) fetchOrder();
   }, [orderId]);
 
-  if (loading)
-    return <p className="text-center mt-10 text-pink-500">Loading...</p>;
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-8 h-8 border-t-2 border-white rounded-full animate-spin"></div>
+        <p className="text-gray-600 text-[10px] uppercase tracking-[0.4em]">Retrieving Record...</p>
+      </div>
+    </div>
+  );
 
-  if (!order)
-    return (
-      <p className="text-center mt-10 text-red-500">
-        Order not found
-      </p>
-    );
+  if (!order) return (
+    <div className="min-h-screen bg-black flex items-center justify-center text-white italic font-serif">
+      Acquisition record not found.
+    </div>
+  );
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-pink-900">
-        Order Details
-      </h1>
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black py-20 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-16">
+        
+        <div className="h-fit lg:sticky lg:top-20">
+          <HeaderCard />
+        </div>
 
-      {/* Order Summary */}
-      <div className="bg-white p-6 rounded-2xl shadow mb-8">
-        <p><strong>Order ID:</strong> #{order.order_id}</p>
-        <p><strong>Status:</strong> {order.status}</p>
-        <p><strong>Total Amount:</strong> Rs. {order.total_amount}</p>
-        <p>
-          <strong>Payment:</strong> {order.payment_method} ({order.payment_status})
-        </p>
-        <p>
-          <strong>Shipping:</strong> {order.address}, {order.city}
-        </p>
-        <p><strong>Phone:</strong> {order.phone}</p>
-        <p className="text-sm text-gray-500">
-          Placed on: {new Date(order.createdAt).toLocaleDateString()}
-        </p>
+        <main className="space-y-16">
+          <div className="flex flex-col md:flex-row justify-between items-end border-b border-gray-900 pb-8 gap-8">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-serif font-light tracking-tight italic">Acquisition Details</h1>
+              <div className="w-24 h-[1px] bg-gray-900"></div>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Reference #{order.order_id}</p>
+            </div>
+            <div className="text-right space-y-2">
+               <p className="text-[10px] uppercase tracking-widest text-gray-500">Status</p>
+               <span className="text-sm font-serif italic text-white border border-gray-800 px-6 py-2 uppercase tracking-widest bg-gray-950">
+                 {order.status}
+               </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Summary */}
+            <div className="bg-gray-950/20 border border-gray-900 p-10 space-y-8">
+               <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 border-b border-gray-900 pb-4">Order Summary</h2>
+               <div className="space-y-6">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Aggregate Value</p>
+                    <p className="text-xl font-light text-white tracking-widest">₹{order.total_amount}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Settlement</p>
+                    <p className="text-sm font-light text-white uppercase tracking-widest">{order.payment_method} — {order.payment_status}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Acquisition Date</p>
+                    <p className="text-sm font-light text-white">{new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+               </div>
+            </div>
+
+            {/* Delivery */}
+            <div className="bg-gray-950/20 border border-gray-900 p-10 space-y-8">
+               <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 border-b border-gray-900 pb-4">Logistics</h2>
+               <div className="space-y-6">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Recipient</p>
+                    <p className="text-sm font-light text-white uppercase tracking-wide">{order.fullName}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Residence</p>
+                    <p className="text-sm font-light text-gray-400 italic leading-relaxed">{order.address}, {order.city}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">Contact</p>
+                    <p className="text-sm font-light text-white">{order.phone}</p>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          {/* Masterpiece Manifest */}
+          <div className="space-y-8">
+            <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 border-b border-gray-900 pb-4">Acquired Masterpieces</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-900">
+                    <th className="py-6 text-[10px] uppercase tracking-widest text-gray-600 font-medium">Description</th>
+                    <th className="py-6 text-[10px] uppercase tracking-widest text-gray-600 font-medium text-center">Price</th>
+                    <th className="py-6 text-[10px] uppercase tracking-widest text-gray-600 font-medium text-center">Qty</th>
+                    <th className="py-6 text-[10px] uppercase tracking-widest text-gray-600 font-medium text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-900/50">
+                  {order.order_items.map((item, i) => (
+                    <tr key={i} className="group">
+                      <td className="py-8">
+                        <p className="text-sm font-serif font-light text-white uppercase tracking-wide">{item.name}</p>
+                        <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Ref ID: {item.product_id}</p>
+                      </td>
+                      <td className="py-8 text-center text-sm font-light text-gray-400">₹{item.price}</td>
+                      <td className="py-8 text-center text-sm font-light text-gray-400">{item.quantity}</td>
+                      <td className="py-8 text-right text-sm font-light text-white tracking-widest">₹{item.price * item.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="pt-12">
+            <button
+              onClick={() => navigate("/orders")}
+              className="text-[10px] uppercase tracking-[0.3em] text-gray-500 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1"
+            >
+              ← Return to Acquisitions
+            </button>
+          </div>
+        </main>
       </div>
-
-      {/* Items */}
-      <div className="bg-white p-6 rounded-2xl shadow">
-        <h2 className="text-xl font-semibold mb-4">Items</h2>
-
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-pink-50 text-left">
-              <th className="p-3">Product</th>
-              <th className="p-3">Price</th>
-              <th className="p-3">Qty</th>
-              <th className="p-3">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.order_items.map((item, i) => (
-              <tr key={i} className="border-b">
-                <td className="p-3">{item.name}</td>
-                <td className="p-3">Rs. {item.price}</td>
-                <td className="p-3">{item.quantity}</td>
-                <td className="p-3">
-                  Rs. {item.price * item.quantity}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <button
-        onClick={() => navigate("/orders")}
-        className="mt-6 px-6 py-3 bg-pink-600 text-white rounded-xl hover:bg-pink-700"
-      >
-        ← Back to Orders
-      </button>
     </div>
   );
 };

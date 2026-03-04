@@ -57,6 +57,12 @@ const PlaceOrder = () => {
     e.preventDefault();
     if (!cartItems.length) return toast.error("Your bag is currently empty");
     
+    // Client-side phone validation
+    const phoneRegex = /^[0-9+ \-()]+$/;
+    if (!phoneRegex.test(formData.phone)) {
+      return toast.error("Please enter a valid phone number (digits, +, -, and parentheses only)");
+    }
+    
     setLoading(true);
     const loadingToast = toast.loading("Finalizing acquisition...", {
       style: { background: "#000", color: "#fff", border: "1px solid #333" }
@@ -159,7 +165,7 @@ const PlaceOrder = () => {
                 <div key={item.cart_id} className="flex gap-6 items-center">
                   <div className="w-16 h-20 bg-gray-950 border border-gray-900 overflow-hidden flex-shrink-0">
                     {item.Product?.thumbnail && (
-                      <img src={item.Product.thumbnail} className="w-full h-full object-cover grayscale" alt={item.Product.name} />
+                      <img src={`${import.meta.env.VITE_API_BASE_URL}${item.Product.thumbnail}`} className="w-full h-full object-cover" alt={item.Product.name} />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

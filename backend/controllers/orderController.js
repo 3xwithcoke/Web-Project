@@ -117,7 +117,7 @@ const getAllOrdersAdmin = async (req, res) => {
 
     const { status } = req.query;
     const query = {};
-    if (status && status !== "All") query.status = status;
+    if (status && status.toLowerCase() !== "all") query.status = status;
 
     const orders = await Order.findAll({
       where: query,

@@ -29,10 +29,11 @@ const HeaderProfile = () => {
 
       {/* Luxury Dropdown */}
       <div
-        className="absolute right-0 mt-4 w-64 bg-black border border-gray-900 shadow-2xl opacity-0 invisible
-                   group-hover:opacity-100 group-hover:visible transition-all duration-500 z-50 p-2"
+        className="absolute right-0 mt-0 w-64 bg-black border border-gray-900 shadow-2xl opacity-0 invisible
+                   group-hover:opacity-100 group-hover:visible transition-all duration-500 z-50 p-2
+                   before:absolute before:-top-8 before:left-0 before:right-0 before:h-8 before:content-['']"
       >
-        <div className="px-6 py-6 border-b border-gray-900 mb-2">
+        <div className="mt-4 px-6 py-6 border-b border-gray-900 mb-2">
           <p className="font-serif font-light text-white text-base tracking-tight italic">{user.username}</p>
           <p className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">{user.email}</p>
         </div>

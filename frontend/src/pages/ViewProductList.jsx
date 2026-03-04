@@ -122,7 +122,7 @@ const ViewProductList = () => {
               >
                 <div className={`${view === "list" ? "w-full md:w-72" : "aspect-[4/5]"} overflow-hidden bg-gray-950`}>
                   <img
-                    src={product.thumbnail || "/placeholder.png"}
+                    src={product.thumbnail ? `${import.meta.env.VITE_API_BASE_URL}${product.thumbnail}` : "/placeholder.png"}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000"
                   />

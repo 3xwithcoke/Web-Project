@@ -67,7 +67,7 @@ const DashboardMain = ({
               name={p.name}
               description={p.brand || "Luxury Brand"}
               price={p.price}
-              imageUrl={p.thumbnail}
+              imageUrl={p.thumbnail ? `${import.meta.env.VITE_API_BASE_URL}${p.thumbnail}` : null}
               onAddToCart={() => handleAddToCart(p.product_id)}
               onAddToWishlist={() => handleAddToWishlist(p.product_id)}
               onClick={()=> navigate(`/product/${p.product_id}`)}

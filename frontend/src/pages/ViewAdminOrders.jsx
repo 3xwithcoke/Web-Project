@@ -16,12 +16,15 @@ const ViewAdminOrders = () => {
     const fetchOrders = async () => {
       setLoading(true);
       try {
-        const res = await getAllOrdersAdminApi(statusFilter === "All" ? "ALL" : statusFilter);
+        const res = await getAllOrdersAdminApi(statusFilter);
         if (res.data.success) {
-          setOrders(res.data.orders || res.data.data || []);
+          setOrders(res.data.orders || res.data.data || res.data.results || []);
+        } else {
+          toast.error(res.data.message || "Failed to retrieve ledger");
         }
-      } catch {
-        toast.error("Failed to retrieve ledger");
+      } catch (err) {
+        console.error("Ledger Fetch Error:", err);
+        toast.error("Failed to retrieve ledger: " + (err.response?.data?.message || err.message));
       } finally {
         setLoading(false);
       }

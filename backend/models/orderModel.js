@@ -28,7 +28,7 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        is: /^[0-9+ ]+$/i, 
+        is: /^[0-9+ \-()]+$/i, 
       }
     },
 

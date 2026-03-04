@@ -60,7 +60,7 @@ const Header = () => {
           <Link to="/search" className="hover:text-gray-400 transition text-lg">
             <FaSearch />
           </Link>
-          <Link to="/cart" className="hover:text-gray-400 transition text-lg relative">
+          <Link to="/viewcart" className="hover:text-gray-400 transition text-lg relative">
             <FaShoppingBag />
           </Link>
           <HeaderProfile />

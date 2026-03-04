@@ -85,7 +85,7 @@ export default function Cart() {
                 >
                   <div className="w-full md:w-48 aspect-square bg-gray-950 overflow-hidden">
                     <img
-                      src={item.Product.thumbnail}
+                      src={`${import.meta.env.VITE_API_BASE_URL}${item.Product.thumbnail}`}
                       alt={item.Product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
                     />

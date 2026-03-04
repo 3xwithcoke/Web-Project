@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getWishListApi, moveToCartApi, removeFromWishListApi } from "../services/api";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
+import { FaTrash } from "react-icons/fa";
 
 const Wishlist = ({ user }) => {
   const navigate = useNavigate();

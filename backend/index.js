@@ -24,6 +24,7 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 app.use("/uploads", express.static("uploads"));
+app.use("/uploads/profile", express.static("uploads/profile"));
 
 app.use("/api/user", require('./routes/userRoute'));
 app.use("/api/product", require('./routes/productRoute'));

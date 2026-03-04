@@ -30,9 +30,9 @@ export default function AdminDashboard() {
         });
 
         setStats({
-          products: productsRes.data.results?.length || 0,
-          orders: ordersRes.data.orders?.length || ordersRes.data.data?.length || 0,
-          users: usersRes.data.data?.length || usersRes.data.users?.length || 0,
+          products: productsRes.data.results?.length || productsRes.data.data?.length || 0,
+          orders: ordersRes.data.orders?.length || ordersRes.data.data?.length || ordersRes.data.results?.length || 0,
+          users: usersRes.data.data?.length || usersRes.data.users?.length || usersRes.data.results?.length || 0,
         });
       } catch (error) {
         console.error("Failed to fetch admin stats:", error);

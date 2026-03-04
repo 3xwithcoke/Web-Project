@@ -9,12 +9,6 @@ const getProductDetails = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
     const product = entry.toJSON();
-    const baseUrl = "http://localhost:8000";
-    product.thumbnail = product.thumbnail ? `${baseUrl}${product.thumbnail}` : null;
-    product.images = Array.isArray(product.images)
-      ? product.images.map(img => `${baseUrl}${img}`)
-      : [];
-
     res.status(200).json({
       success: true,
       product,
@@ -47,14 +41,7 @@ const getRelatedProducts = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:8000";
-    const formattedProducts = products.map(p => {
-      const product = p.toJSON();
-      product.thumbnail = product.thumbnail
-        ? `${baseUrl}${product.thumbnail}`
-        : null;
-      return product;
-    });
+    const formattedProducts = products.map(p => p.toJSON());
 
     res.status(200).json({
       success: true,
@@ -78,13 +65,7 @@ const getAllProducts = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:8000"; 
-
-    const formattedProducts = products.map(p => {
-      const product = p.toJSON();
-      product.thumbnail = product.thumbnail ? `${baseUrl}${product.thumbnail}` : null;
-      return product;
-    });
+    const formattedProducts = products.map(p => p.toJSON());
 
     res.status(200).json({
       success: true,
@@ -138,12 +119,7 @@ const getProductsByCategory = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:8000";
-    const formattedProducts = products.map(p => {
-      const product = p.toJSON();
-      product.thumbnail = product.thumbnail ? `${baseUrl}${product.thumbnail}` : null;
-      return product;
-    });
+    const formattedProducts = products.map(p => p.toJSON());
 
     res.status(200).json({
       success: true,

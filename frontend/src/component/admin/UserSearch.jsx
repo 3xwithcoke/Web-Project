@@ -1,20 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
+import { FaSearch } from "react-icons/fa";
 
 const UserSearch = ({ query, setQuery }) => {
   return (
-    <form className="flex gap-2 mb-6" onSubmit={(e) => e.preventDefault()}>
+    <form className="relative group" onSubmit={(e) => e.preventDefault()}>
       <input
         type="text"
-        placeholder="Search by username or email..."
+        placeholder="Find collectors in the registry..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="flex-1 p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
+        className="w-full bg-transparent border-b border-gray-900 py-4 pr-12 text-sm font-light focus:border-white transition-all outline-none placeholder:text-gray-700"
       />
       <button
         type="submit"
-        className="bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition-colors"
+        className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-800 group-focus-within:text-white transition-colors"
       >
-        Search
+        <FaSearch size={14} />
       </button>
     </form>
   );

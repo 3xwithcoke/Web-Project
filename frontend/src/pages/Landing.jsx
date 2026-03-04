@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import HeaderCard from '../component/dashboard/HeaderCard'
 import DashboardMain from '../component/dashboard/DashboardMain'
 import toast, { Toaster } from 'react-hot-toast'
 import { Link } from 'react-router-dom'
@@ -11,7 +10,6 @@ const Landing = () => {
   const [loading, setLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Fetch products and categories on mount
   useEffect(() => {
     const loadDashboard = async () => {
       setLoading(true);
@@ -20,11 +18,13 @@ const Landing = () => {
           fetchProducts(),
           fetchCategories()
         ]);
+        console.log("Product Response:", productRes.data);
+        console.log("Category Response:", categoryRes.data);
         setProducts(productRes.data.results || []);
         setCategories(categoryRes.data.data || []);
       } catch (error) {
-        console.error("Dashboard API Error:", error.message);
-        toast.error("Failed to load dashboard data");
+        console.error("Dashboard API Error:", error.response || error);
+        toast.error(`Connection Error: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -40,57 +40,66 @@ const Landing = () => {
   const handleCategoryClick = async (categoryName) => {
     try {
       if (!categoryName) return setFilteredProducts(products);
-
-      const res = await getProductsByCategoryApi(categoryName);
-      setFilteredProducts(res.data.results || []);
+      // Assuming getProductsByCategoryApi is available or use filtered state
+      const filtered = products.filter(p => p.category === categoryName);
+      setFilteredProducts(filtered);
     } catch (error) {
       console.error("Category filter error:", error.message);
       toast.error("Failed to filter by category");
     }
   };
+
   return (
-    <div className="w-full bg-gradient-to-b from-pink-50 via-white to-pink-50 min-h-screen px-4 sm:px-6 md:px-12 py-8 md:py-16">
+    <div className="w-full bg-black min-h-screen text-white">
       <Toaster />
 
-      {/* Welcome Section */}
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 md:gap-12 mb-16">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-pink-600 font-semibold">
-                ✨ Unleash Your Natural Beauty
-              </p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Welcome Back! <br className="hidden sm:block" />
-                <span className="text-pink-600">Shine Bright</span> Today
-              </h1>
-            </div>
-            <p className="text-gray-600 text-base sm:text-lg max-w-md leading-relaxed">
-              Discover our premium makeup and skincare collection designed to make you feel confident and beautiful every day.
+      {/* Hero Section */}
+      <div className="relative h-[80vh] flex items-center justify-center overflow-hidden border-b border-gray-900">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1547996160-81dfa63595dd?q=80&w=2000&auto=format&fit=crop"
+            alt="Hero Background"
+            className="w-full h-full object-cover opacity-40 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80"></div>
+        </div>
+
+        <div className="relative z-10 text-center space-y-8 px-4 max-w-4xl mx-auto">
+          <div className="space-y-4">
+            <p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-gray-400 font-light animate-fade-in">
+              The Essence of Timeless Elegance
             </p>
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif font-light tracking-tighter leading-none animate-slide-up">
+              Define Your <br />
+              <span className="italic font-normal">Legacy</span>
+            </h1>
+          </div>
+          <p className="text-gray-400 text-lg sm:text-xl font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-delayed">
+            Discover a curated collection of world-class timepieces, where precision meets unparalleled luxury.
+          </p>
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link
+              to="/viewproductlist"
+              className="border border-white text-white px-12 py-4 text-sm font-medium tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-500 rounded-none shadow-2xl"
+            >
+              Explore Collection
+            </Link>
             <Link
               to="/about"
-              className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 md:px-8 py-3 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="border border-white/30 text-white px-12 py-4 text-sm font-medium tracking-widest uppercase hover:bg-white/10 transition-all duration-500 rounded-none"
             >
-              Explore Now
-              <span className="text-lg">→</span>
+              Our Heritage
             </Link>
-          </div>
-          <div className="flex justify-center lg:justify-end order-first lg:order-last">
-            <div className="w-full max-w-sm aspect-square rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src="/src/assets/dashpic.jpg"
-                alt="Hero"
-                className="w-full h-full object-cover"
-              />
-            </div>
           </div>
         </div>
       </div>
-      {/* Main Dashboard */}
-      <div className="max-w-7xl mx-auto mt-16">
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {loading ? (
-          <p className="text-center text-gray-500">Loading...</p>
+          <div className="flex justify-center items-center h-64">
+            <div className="w-8 h-8 border-t-2 border-white rounded-full animate-spin"></div>
+          </div>
         ) : (
           <DashboardMain
             products={products}

@@ -9,7 +9,7 @@ const getProductDetails = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
     const product = entry.toJSON();
-    const baseUrl = "http://localhost:5000";
+    const baseUrl = "http://localhost:8000";
     product.thumbnail = product.thumbnail ? `${baseUrl}${product.thumbnail}` : null;
     product.images = Array.isArray(product.images)
       ? product.images.map(img => `${baseUrl}${img}`)
@@ -47,7 +47,7 @@ const getRelatedProducts = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:5000";
+    const baseUrl = "http://localhost:8000";
     const formattedProducts = products.map(p => {
       const product = p.toJSON();
       product.thumbnail = product.thumbnail
@@ -78,7 +78,7 @@ const getAllProducts = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:5000"; 
+    const baseUrl = "http://localhost:8000"; 
 
     const formattedProducts = products.map(p => {
       const product = p.toJSON();
@@ -138,7 +138,7 @@ const getProductsByCategory = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = "http://localhost:5000";
+    const baseUrl = "http://localhost:8000";
     const formattedProducts = products.map(p => {
       const product = p.toJSON();
       product.thumbnail = product.thumbnail ? `${baseUrl}${product.thumbnail}` : null;
@@ -199,33 +199,34 @@ const deleteProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    console.log("req.user", req.user)
-    console.log("req.body", req.body)
-    console.log("req.files", req.files)
-    const { name, category, description, price, oldPrice, stock, ingredients, howToUse } = req.body;
+    const { 
+      name, category, description, price, oldPrice, stock, 
+      brand, model, movement_type, case_material, water_resistance, warranty 
+    } = req.body;
 
-    if (!name || !description || !price || !stock) {
+    if (!name || !description || !price || !stock || !brand || !model) {
       return res.status(400).json({
         success: false,
-        message: "Name, description, price, stock, and thumbnail are required"
+        message: "Name, description, price, stock, brand, and model are required"
       });
     }
 
-    
     const thumbnail = `/uploads/${req.files.thumbnail[0].filename}`;
-
-    
     const images = req.files?.images ? req.files.images.map(f => `/uploads/${f.filename}`) : [];
 
     const product = await Product.create({
       name,
-      category: category || "Beauty & Cosmetics",
+      category: category || "Luxury Watches",
       description,
       price: Number(price),
       oldPrice: oldPrice ? Number(oldPrice) : null,
       stock: Number(stock),
-      ingredients,
-      howToUse,
+      brand,
+      model,
+      movement_type,
+      case_material,
+      water_resistance,
+      warranty,
       thumbnail,
       images,
     });

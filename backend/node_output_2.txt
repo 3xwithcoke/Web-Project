@@ -1,0 +1,3 @@
+[dotenv@17.2.3] injecting env (5) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+PostgreSQL connected sucessfully.
+Server is running on port 5000

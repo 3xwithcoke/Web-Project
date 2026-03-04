@@ -14,169 +14,115 @@ const DashboardMain = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className="space-y-20">
+    <div className="space-y-32">
       {/* Featured Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 items-center bg-white rounded-2xl p-6 md:p-10 shadow-lg hover:shadow-xl transition-shadow">
-        <div className="flex justify-center lg:justify-start order-last lg:order-first">
-          <div className="w-full max-w-sm aspect-square rounded-2xl overflow-hidden shadow-xl">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center bg-black border border-gray-900 rounded-none p-12 transition-all">
+        <div className="flex justify-center order-last lg:order-first">
+          <div className="w-full max-w-md aspect-square rounded-none overflow-hidden shadow-2xl">
             <img
-              src="/src/assets/dash2.png"
+              src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop"
               alt="Featured"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover hover:scale-110 transition-transform duration-700 opacity-80"
             />
           </div>
         </div>
-        <div className="space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
-            Premium <span className="text-pink-600">Skincare</span> Collection
-          </h2>
-          <p className="text-gray-600 text-base sm:text-lg max-w-md leading-relaxed">
-            Explore our curated range of skincare essentials that nourish, protect, and enhance your natural beauty with premium ingredients.
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <p className="text-gray-500 uppercase tracking-widest text-xs">Exquisite Craftsmanship</p>
+            <h2 className="text-4xl sm:text-5xl font-serif font-light text-white leading-tight">
+              Masterpieces <span className="italic">in Motion</span>
+            </h2>
+          </div>
+          <p className="text-gray-400 text-lg max-w-md leading-relaxed font-light">
+            Each timepiece in our collection represents a legacy of precision and design. From mechanical marvels to modern smart-watches.
           </p>
           <Link
-            to="/shop"
-            className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 md:px-8 py-3 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            to="/viewproductlist"
+            className="inline-block border border-white text-white px-10 py-4 font-medium uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all duration-700 shadow-2xl"
           >
-            Shop Now 
-            <span className="text-lg">→</span>
+            View Masterpieces
           </Link>
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* Trending Products */}
       <section>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Trending Products</h2>
+        <div className="flex justify-between items-end mb-16 border-b border-gray-900 pb-4">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-serif font-light text-white">Trending Timepieces</h2>
+            <p className="text-gray-500 text-xs uppercase tracking-widest">Most sought after models</p>
+          </div>
           <Link
             to="/viewproductlist"
-            className="text-pink-600 font-semibold hover:text-pink-700 hover:underline flex items-center gap-1 transition-colors"
+            className="text-gray-400 text-xs uppercase tracking-widest hover:text-white transition-colors"
           >
-            View All 
-            <span>→</span>
+            View Entire Collection <span>→</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {products.slice(0, 10).map((p) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
+          {products.slice(0, 8).map((p) => (
             <ProductCard
               key={p.product_id}
               name={p.name}
-              description={p.description}
+              description={p.brand || "Luxury Brand"}
               price={p.price}
               imageUrl={p.thumbnail}
               onAddToCart={() => handleAddToCart(p.product_id)}
               onAddToWishlist={() => handleAddToWishlist(p.product_id)}
               onClick={()=> navigate(`/product/${p.product_id}`)}
-              className="transition-all duration-300 hover:shadow-xl hover:scale-105 rounded-xl"
+              className="bg-black border border-gray-900 p-4 transition-all duration-500 hover:border-gray-500"
             />
           ))}
         </div>
-      </section>
-
-      {/* Promo Banner */}
-      <section className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
-        <img
-          src="/src/assets/Bellezebanner.png"
-          alt="Full Width Promo"
-          className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300"
-        />
       </section>
 
       {/* Categories */}
-      <section>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Shop by Category</h2>
-          <Link
-            to="/viewcategories"
-            className="text-pink-600 font-semibold hover:text-pink-700 hover:underline flex items-center gap-1 transition-colors"
-          >
-            View All 
-            <span>→</span>
-          </Link>
-        </div>
+      <section className="bg-gray-950 py-24 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col items-center mb-16 space-y-4">
+            <h2 className="text-4xl font-serif font-light text-white text-center">Curated Collections</h2>
+            <div className="w-24 h-[1px] bg-gray-700"></div>
+          </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {categories.map((cat, i) => (
-            <CategoryCard
-              key={i}
-              name={cat.category}
-              onClick={() => onCategoryClick(cat.category)}
-              className="transition-all duration-300 hover:shadow-lg hover:scale-105 rounded-xl"
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Filtered Products by Category */}
-      {filteredProducts.length > 0 && (
-        <section className="bg-gradient-to-r from-pink-50 to-red-50 rounded-2xl p-6 md:p-10">
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
-            ✨ Products in <span className="text-pink-600">Category</span>
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-            {filteredProducts.slice(0, 10).map((p) => (
-              <ProductCard
-                key={p.product_id}
-                name={p.name}
-                description={p.description}
-                price={p.price}
-                imageUrl={p.thumbnail}
-                onAddToCart={() => handleAddToCart(p.product_id)}
-                onAddToWishlist={() => handleAddToWishlist(p.product_id)}
-                onClick={()=> navigate(`/product/${p.product_id}`)}
-                className="transition-all duration-300 hover:shadow-xl hover:scale-105 rounded-xl"
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+            {categories.map((cat, i) => (
+              <CategoryCard
+                key={i}
+                name={cat.category}
+                onClick={() => onCategoryClick(cat.category)}
+                className="group cursor-pointer text-center"
               />
             ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* UX Info Section */}
-      <section className="bg-gradient-to-br from-pink-600 via-pink-500 to-red-500 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 md:px-10 py-12 md:py-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-4">
-            Shopping Made Simple & Secure
-          </h2>
-          <p className="text-pink-100 text-center mb-12 max-w-2xl mx-auto">
-            Experience the best in beauty shopping with our customer-first approach
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="bg-white/95 backdrop-blur rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-center">
-              <div className="flex justify-center mb-4 text-4xl text-pink-600">
-                <FaTruck />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Pay After Delivery
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Pay only once your order arrives at your doorstep with complete peace of mind
-              </p>
+      {/* Trust Markers */}
+      <section className="border-y border-gray-900 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center text-3xl text-gray-400">
+              <FaTruck />
             </div>
+            <h3 className="text-sm font-medium uppercase tracking-widest text-white">White-Glove Delivery</h3>
+            <p className="text-gray-500 text-sm font-light leading-relaxed">Secure, insured shipping to your doorstep, handled with the utmost care.</p>
+          </div>
 
-            <div className="bg-white/95 backdrop-blur rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-center">
-              <div className="flex justify-center mb-4 text-4xl text-pink-600">
-                <FaShieldAlt />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Safe & Confidential
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Your personal information stays protected with industry-leading security
-              </p>
+          <div className="text-center space-y-4">
+            <div className="flex justify-center text-3xl text-gray-400">
+              <FaShieldAlt />
             </div>
+            <h3 className="text-sm font-medium uppercase tracking-widest text-white">Authenticity Guaranteed</h3>
+            <p className="text-gray-500 text-sm font-light leading-relaxed">Every timepiece comes with an official certificate of authenticity and warranty.</p>
+          </div>
 
-            <div className="bg-white/95 backdrop-blur rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-center">
-              <div className="flex justify-center mb-4 text-4xl text-pink-600">
-                <FaExchangeAlt />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Easy Replacement
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Quick and stress-free replacement on eligible products with no hassle
-              </p>
+          <div className="text-center space-y-4">
+            <div className="flex justify-center text-3xl text-gray-400">
+              <FaExchangeAlt />
             </div>
+            <h3 className="text-sm font-medium uppercase tracking-widest text-white">Luxury Exchange</h3>
+            <p className="text-gray-500 text-sm font-light leading-relaxed">Upgrade or exchange your timepiece with our exclusive concierge service.</p>
           </div>
         </div>
       </section>

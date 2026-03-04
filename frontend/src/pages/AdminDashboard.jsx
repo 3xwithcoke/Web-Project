@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminCard from "../component/dashboard/AdminCard";
-import axios from "axios";
+import { fetchProducts, getAllOrdersAdminApi, getAllUsersApi } from "../services/api";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -15,18 +16,27 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch all products count
-        const productsRes = await axios.get("/api/product/getallproducts");
-        const ordersRes = await axios.get("/api/order/getallorders");
-        const usersRes = await axios.get("/api/user/getallusers");
+        setLoading(true);
+        const [productsRes, ordersRes, usersRes] = await Promise.all([
+          fetchProducts(),
+          getAllOrdersAdminApi("All"),
+          getAllUsersApi("user")
+        ]);
+
+        console.log("Admin Dashboard Data Sync:", {
+          products: productsRes.data,
+          orders: ordersRes.data,
+          users: usersRes.data
+        });
 
         setStats({
           products: productsRes.data.results?.length || 0,
-          orders: ordersRes.data.results?.length || 0,
-          users: usersRes.data.results?.length || 0,
+          orders: ordersRes.data.orders?.length || ordersRes.data.data?.length || 0,
+          users: usersRes.data.data?.length || usersRes.data.users?.length || 0,
         });
       } catch (error) {
         console.error("Failed to fetch admin stats:", error);
+        toast.error("Failed to sync archives");
       } finally {
         setLoading(false);
       }
@@ -37,69 +47,86 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500 text-lg">Loading dashboard...</p>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-8 h-8 border-t-2 border-white rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-[10px] uppercase tracking-[0.4em]">Accessing Secure Vault...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-8 py-10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black py-20 px-6">
+      <Toaster />
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-16">
         {/* Sidebar */}
-        <AdminCard />
+        <div className="h-fit lg:sticky lg:top-20">
+          <AdminCard />
+        </div>
 
         {/* Main Dashboard */}
-        <main>
-          <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-            Admin Overview
-          </h1>
+        <main className="space-y-16">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tight italic">
+              Executive Overview
+            </h1>
+            <div className="w-24 h-[1px] bg-gray-900"></div>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Chronos Luxe Management Suite</p>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div
-              className="bg-white rounded-lg p-6 shadow cursor-pointer hover:shadow-lg transition"
+              className="group bg-gray-950/20 border border-gray-900 p-10 cursor-pointer hover:border-gray-600 transition-all duration-700"
               onClick={() => navigate("/addproduct")}
             >
-              <p className="text-sm text-gray-500">Total Products</p>
-              <p className="text-3xl font-bold text-pink-400">{stats.products}</p>
-              <p className="text-green-500 mt-1 text-sm">
-                ▲ 10.23% than last month
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-4 group-hover:text-gray-400 transition-colors">Catalog Inventory</p>
+              <div className="flex justify-between items-end">
+                <p className="text-5xl font-light tracking-tighter text-white">{stats.products}</p>
+                <span className="text-[10px] text-gray-700 uppercase tracking-widest pb-1">Masterpieces</span>
+              </div>
             </div>
 
             <div
-              className="bg-white rounded-lg p-6 shadow cursor-pointer hover:shadow-lg transition-shadow"
+              className="group bg-gray-950/20 border border-gray-900 p-10 cursor-pointer hover:border-gray-600 transition-all duration-700"
               onClick={() => navigate("/viewadminorder")}
             >
-              <p className="text-sm text-gray-500">Total Orders</p>
-              <p className="text-3xl font-bold text-pink-400">{stats.orders}</p>
-              <p className="text-green-500 mt-1 text-sm">
-                ▲ 20.50% than last month
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-4 group-hover:text-gray-400 transition-colors">Client Acquisitions</p>
+              <div className="flex justify-between items-end">
+                <p className="text-5xl font-light tracking-tighter text-white">{stats.orders}</p>
+                <span className="text-[10px] text-gray-700 uppercase tracking-widest pb-1">Confirmed Orders</span>
+              </div>
             </div>
 
             <div
-              className="bg-white rounded-lg p-6 shadow cursor-pointer hover:shadow-lg transition-shadow"
+              className="group bg-gray-950/20 border border-gray-900 p-10 cursor-pointer hover:border-gray-600 transition-all duration-700"
               onClick={() => navigate("/viewallusers")}
             >
-              <p className="text-sm text-gray-500">Total Users</p>
-              <p className="text-3xl font-bold text-pink-400">{stats.users}</p>
-              <p className="text-green-500 mt-1 text-sm">
-                ▲ 30.33% than last month
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-4 group-hover:text-gray-400 transition-colors">Member Registry</p>
+              <div className="flex justify-between items-end">
+                <p className="text-5xl font-light tracking-tighter text-white">{stats.users}</p>
+                <span className="text-[10px] text-gray-700 uppercase tracking-widest pb-1">Active Collectors</span>
+              </div>
             </div>
 
             <div
-              className="bg-white rounded-lg p-6 shadow cursor-pointer hover:shadow-lg transition-shadow"
+              className="group bg-white text-black p-10 cursor-pointer hover:bg-gray-200 transition-all duration-700"
               onClick={() => navigate("/addproduct")}
             >
-              <p className="text-sm text-gray-500">Add Product</p>
-              <p className="text-3xl font-bold text-pink-400">+</p>
-              <p className="text-gray-500 mt-1 text-sm">Quickly add new products</p>
+              <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-4">Registry Access</p>
+              <div className="flex justify-between items-end">
+                <p className="text-4xl font-serif font-light tracking-tight italic">New Arrival</p>
+                <span className="text-2xl pb-1">+</span>
+              </div>
             </div>
           </div>
 
-          {/* Optionally: add a table or list of recent orders/products */}
+          <div className="border border-gray-900 p-12 space-y-8">
+             <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 border-b border-gray-900 pb-4">Security Protocol</h2>
+             <p className="text-sm font-light text-gray-600 leading-relaxed max-w-2xl">
+                As an administrator of Chronos Luxe, you have been granted access to the global archives. Please ensure all modifications to the masterpiece registry are authenticated and verified against physical stock.
+             </p>
+          </div>
         </main>
       </div>
     </div>

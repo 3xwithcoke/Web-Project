@@ -16,7 +16,7 @@ const ViewOrders = () => {
       try {
         const res = await getOrdersApi();
         if (res.data.success) {
-          setOrders(res.data.orders);
+          setOrders(res.data.orders || []);
         }
       } catch (err) {
         console.error("Error fetching orders:", err);
@@ -33,93 +33,92 @@ const ViewOrders = () => {
       : orders.filter(order => order.status === filter);
 
   return (
-    <div className="min-h-screen w-full bg-pink-50 flex flex-col md:flex-row items-start py-12 px-6 md:gap-8">
-
-      <div className="mb-8 md:mb-0">
-        <HeaderCard />
-      </div>
-
-      <div className="flex-1 bg-white rounded-[2.5rem] shadow-lg p-8 md:p-12 w-full">
-        <div className="mb-8">
-          <h1 className="text-4xl font-semibold text-pink-900 mb-2">
-            My Orders
-          </h1>
-          <p className="text-pink-700 opacity-70">
-            Track and manage your purchases
-          </p>
+    <div className="min-h-screen w-full bg-black text-white selection:bg-white selection:text-black py-20">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-16">
+        <div className="lg:col-span-1">
+          <HeaderCard />
         </div>
 
-        <div className="flex space-x-6 border-b border-pink-100 mb-8 overflow-x-auto">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`pb-3 text-lg font-medium transition-all whitespace-nowrap ${
-                filter === tab
-                  ? "text-pink-600 border-b-4 border-pink-600"
-                  : "text-pink-300 hover:text-pink-500"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <div className="lg:col-span-3 space-y-16">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tight italic">Your Acquisitions</h1>
+            <div className="w-24 h-[1px] bg-gray-900"></div>
+            <p className="text-xs text-gray-600 uppercase tracking-widest pt-2">Track and manage your horological history</p>
+          </div>
 
-        <div className="min-h-[300px]">
-          {loading ? (
-            <p className="text-center text-pink-400 text-xl animate-pulse">
-              Loading orders...
-            </p>
-          ) : filteredOrders.length > 0 ? (
-            <div className="space-y-4">
-              {filteredOrders.map(order => (
-                <div
-                  key={order.order_id}
-                  onClick={() => navigate(`/order/${order.order_id}`)}
-                  className="cursor-pointer bg-pink-50 hover:bg-pink-100 transition p-6 rounded-2xl flex justify-between items-center border border-pink-100"
-                >
-                  <div>
-                    <p className="font-bold text-pink-900 text-lg">
-                      Order #{order.order_id}
-                    </p>
-                    <p className="text-pink-500 text-sm">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="text-pink-700 font-medium">
-                      Rs. {order.total_amount}
-                    </p>
-                  </div>
+          <div className="flex space-x-12 border-b border-gray-900 overflow-x-auto pb-4">
+            {tabs.map(tab => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`text-[10px] uppercase tracking-[0.3em] transition-all whitespace-nowrap pb-2 ${
+                  filter === tab
+                    ? "text-white border-b border-white"
+                    : "text-gray-600 hover:text-gray-400"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-                  <span
-                    className={`px-4 py-1 rounded-full text-sm font-semibold ${
-                      order.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : order.status === "Shipped"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
+          <div className="min-h-[400px]">
+            {loading ? (
+              <div className="flex items-center gap-4 py-20 text-gray-600">
+                <div className="w-4 h-4 border-t border-gray-600 rounded-full animate-spin"></div>
+                <span className="text-[10px] uppercase tracking-widest">Consulting Ledgers...</span>
+              </div>
+            ) : filteredOrders.length > 0 ? (
+              <div className="space-y-6">
+                {filteredOrders.map(order => (
+                  <div
+                    key={order.order_id}
+                    onClick={() => navigate(`/order/${order.order_id}`)}
+                    className="cursor-pointer group bg-gray-950/20 border border-gray-900 hover:border-gray-600 transition-all duration-700 p-8 flex justify-between items-center"
                   >
-                    {order.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-2xl">🛒</p>
-              <p className="text-pink-500 font-semibold mt-2">
-                No orders found
-              </p>
-            </div>
-          )}
-        </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] uppercase tracking-widest text-gray-600">Archive Reference</p>
+                      <p className="font-serif font-light text-lg text-white">#{order.order_id}</p>
+                      <p className="text-[10px] text-gray-500 uppercase tracking-widest">
+                        {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                    </div>
 
-        <button
-          onClick={() => navigate("/viewproductlist")}
-          className="mt-10 px-10 py-4 rounded-2xl bg-pink-100 text-pink-600 hover:bg-pink-200 font-semibold"
-        >
-          ← Continue Shopping
-        </button>
+                    <div className="text-right space-y-4">
+                      <p className="text-xl font-light tracking-tighter text-white">
+                        ₹{order.total_amount}
+                      </p>
+                      <span
+                        className={`text-[9px] uppercase tracking-[0.2em] px-4 py-1 border ${
+                          order.status === "Pending"
+                            ? "border-yellow-900 text-yellow-600"
+                            : order.status === "Shipped"
+                            ? "border-blue-900 text-blue-600"
+                            : "border-green-900 text-green-600"
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-32 border border-gray-900 border-dashed">
+                <p className="text-[10px] uppercase tracking-[0.4em] text-gray-700 italic">No acquisition records found</p>
+              </div>
+            )}
+          </div>
+
+          <div className="pt-12">
+            <button
+              onClick={() => navigate("/viewproductlist")}
+              className="text-[10px] uppercase tracking-[0.3em] text-gray-500 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1"
+            >
+              ← Return to Collection
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -12,7 +12,6 @@ const UserDashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
 
-  // Fetch products and categories on mount
   useEffect(() => {
     const loadDashboard = async () => {
       setLoading(true);
@@ -35,100 +34,96 @@ const UserDashboard = () => {
   }, []);
 
   useEffect(() => {
-    setFilteredProducts(products); // default shows all
+    setFilteredProducts(products);
   }, [products]);
 
   const handleCategoryClick = async (categoryName) => {
     try {
       if (!categoryName) return setFilteredProducts(products);
-
-      const res = await getProductsByCategoryApi(categoryName);
-      setFilteredProducts(res.data.results || []);
+      const filtered = products.filter(p => p.category === categoryName);
+      setFilteredProducts(filtered);
     } catch (error) {
       console.error("Category filter error:", error.message);
       toast.error("Failed to filter by category");
     }
   };
 
-  // Add product to cart
   const handleAddToCart = async (productId) => {
-    if (cartItems.some((item) => item.productId === productId)) {
-      toast.error("Product already exists in cart");
-      return;
-    }
-
     try {
-      const response = await addToCartApi({ productId, quantity: 1 });
-      toast.success("Added to cart!");
-      setCartItems((prev) => [...prev, { productId, quantity: 1 }]);
+      await addToCartApi({ productId, quantity: 1 });
+      toast.success("Added to collection", {
+        style: { background: "#000", color: "#fff", border: "1px solid #333" }
+      });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add to cart");
     }
   };
 
-
-  // Add product to wishlist
   const handleAddToWishlist = async (productId) => {
     try {
       await addToWishListApi({ productId });
-      toast.success("Added to wishlist!");
+      toast.success("Added to favorites", {
+        style: { background: "#000", color: "#fff", border: "1px solid #333" }
+      });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add to wishlist");
     }
   };
 
   return (
-    <div className="w-full bg-gradient-to-b from-pink-50 via-white to-pink-50 min-h-screen px-4 sm:px-6 md:px-12 py-8 md:py-16">
+    <div className="w-full bg-black min-h-screen text-white px-4 sm:px-6 md:px-12 py-8 md:py-16 selection:bg-white selection:text-black">
       <Toaster/>
 
       {/* Welcome Section */}
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 md:gap-12 mb-16">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-pink-600 font-semibold">
-                ✨ Unleash Your Natural Beauty
+      <div className="max-w-7xl mx-auto mb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+          <div className="space-y-10">
+            <div className="space-y-4">
+              <p className="text-[10px] uppercase tracking-[0.5em] text-gray-500 font-medium">
+                The Horology Boutique
               </p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Welcome Back! <br className="hidden sm:block" /> 
-                <span className="text-pink-600">Shine Bright</span> Today
+              <h1 className="text-5xl sm:text-7xl font-serif font-light text-white leading-tight tracking-tighter">
+                Welcome to <br />
+                <span className="italic font-normal">Chronos Luxe</span>
               </h1>
             </div>
-            <p className="text-gray-600 text-base sm:text-lg max-w-md leading-relaxed">
-              Discover our premium makeup and skincare collection designed to make you feel confident and beautiful every day.
+            <p className="text-gray-400 text-lg sm:text-xl font-light max-w-lg leading-relaxed italic">
+              "Time is the only luxury we cannot buy, but we can certainly measure it with elegance."
             </p>
-            <Link 
-              to="/about" 
-              className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 md:px-8 py-3 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              Explore Now 
-              <span className="text-lg">→</span>
-            </Link>
+            <div className="pt-4">
+              <Link 
+                to="/viewproductlist" 
+                className="inline-block border border-white text-white px-12 py-5 text-xs font-medium uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all duration-700"
+              >
+                View Collection
+              </Link>
+            </div>
           </div>
-          <div className="flex justify-center lg:justify-end order-first lg:order-last">
-            <div className="w-full max-w-sm aspect-square rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative group">
+            <div className="absolute -inset-4 border border-gray-900 group-hover:inset-0 transition-all duration-700"></div>
+            <div className="w-full aspect-[4/5] overflow-hidden group-hover:opacity-100 transition-all duration-1000">
               <img 
-                src="/src/assets/dashpic.jpg" 
-                alt="Hero" 
-                className="w-full h-full object-cover" 
+                src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1000&auto=format&fit=crop" 
+                alt="Luxury Watch Hero" 
+                className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" 
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Access Card */}
-      <div className="max-w-6xl mx-auto mb-16">
+      {/* Simplified Quick Access */}
+      <div className="max-w-7xl mx-auto mb-32 border-y border-gray-900 py-12">
         <QuickAccessCard />
       </div>
 
       {/* Main Dashboard */}
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mb-4"></div>
-              <p className="text-gray-500 font-medium">Loading amazing products...</p>
+          <div className="flex justify-center items-center py-32">
+            <div className="flex flex-col items-center gap-6">
+              <div className="w-8 h-8 border-t-2 border-white rounded-full animate-spin"></div>
+              <p className="text-gray-600 text-[10px] uppercase tracking-[0.4em]">Acquiring Archives...</p>
             </div>
           </div>
         ) : (
@@ -147,4 +142,3 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
-

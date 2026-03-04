@@ -35,7 +35,7 @@ const AdminEditProfile = () => {
         dob: initialData.dob || "",
         gender: initialData.gender || "",
       });
-    } else if (localUser) {
+    } else {
       const fetchProfile = async () => {
         try {
           const { data } = await getProfileApi();
@@ -81,12 +81,12 @@ const AdminEditProfile = () => {
       data.append("email", formData.email);
       data.append("phoneNumber", formData.phoneNumber);
       data.append("address", formData.address);
-      data.append("dob", formData.dob);
+      if (formData.dob) data.append("dob", formData.dob);
       data.append("gender", formData.gender);
       if (formData.profileFile) data.append("profilePicture", formData.profileFile);
 
       const response = await updateProfileApi(data);
-      toast.success(response.data.message || "Profile updated!");
+      toast.success("Security credentials updated");
 
       if (response.data.user) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
@@ -95,30 +95,26 @@ const AdminEditProfile = () => {
 
       navigate("/adminprofile", { state: { refresh: true } });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update profile");
-      console.error("UPDATE PROFILE ERROR:", error.response?.data);
+      toast.error("Failed to update executive archives");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-
-        <div className="md:w-1/4">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black py-20 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+        <div className="md:w-80 flex-shrink-0">
           <AdminCard />
         </div>
 
-        <div className="md:w-3/4 space-y-6">
-
-          <div className="bg-gradient-to-r from-pink-400 to-purple-400 rounded-2xl p-8 text-white">
-            <h1 className="text-3xl font-bold">Edit Personal Information</h1>
-            <p className="opacity-90">Update your details</p>
+        <div className="flex-1 space-y-12">
+          <div className="bg-gray-950 border border-gray-900 p-10">
+            <h1 className="text-4xl font-serif font-light tracking-tight italic">Modify Credentials</h1>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600 mt-2">Executive Archive Access</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-md p-8">
-
-            <div className="mb-6 flex items-center gap-6">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 relative">
+          <div className="bg-black border border-gray-900 p-10 space-y-12">
+            <div className="flex flex-col md:flex-row items-center gap-10 pb-12 border-b border-gray-900">
+              <div className="w-32 h-32 bg-gray-900 border border-gray-800 overflow-hidden">
                 <img
                   src={
                     formData.previewImage
@@ -127,79 +123,89 @@ const AdminEditProfile = () => {
                         : `${import.meta.env.VITE_API_BASE_URL}${formData.previewImage}?t=${Date.now()}`
                       : "/src/assets/user.png"
                   }
-                  alt={formData.username || "Profile"}
-                  className="w-full h-full object-cover rounded-full"
+                  alt="Executive"
+                  className="w-full h-full object-cover grayscale"
                 />
               </div>
 
-              <label
-                htmlFor="profilePicture"
-                className="cursor-pointer bg-pink-400 hover:bg-pink-500 text-white px-4 py-2 rounded-md select-none"
-              >
-                Change Picture
-              </label>
-
-              <input
-                type="file"
-                id="profilePicture"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
+              <div className="space-y-4">
+                <label
+                  htmlFor="profilePicture"
+                  className="cursor-pointer inline-block border border-gray-800 text-[10px] uppercase tracking-widest px-6 py-3 hover:border-white transition-all"
+                >
+                  Acquire New Portrait
+                </label>
+                <input
+                  type="file"
+                  id="profilePicture"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {[
-                { label: "Username", name: "username" },
-                { label: "Email", name: "email" },
-                { label: "Phone Number", name: "phoneNumber" },
-                { label: "Date of Birth", name: "dob", type: "date" },
-                { label: "Gender", name: "gender", type: "select", options: ["Male", "Female", "Other"] },
-                { label: "Address", name: "address", type: "text", full: true },
+                { label: "Identity Name", name: "username" },
+                { label: "Authorized Email", name: "email", type: "email" },
+                { label: "Direct Channel", name: "phoneNumber" },
+                { label: "Origin Date", name: "dob", type: "date" },
               ].map((field) => (
-                <div key={field.name} className={field.full ? "md:col-span-2" : ""}>
-                  <label className="text-gray-500 text-sm mb-1 block">{field.label}</label>
-                  {field.type === "select" ? (
-                    <select
-                      name={field.name}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none"
-                    >
-                      <option value="">Select {field.label}</option>
-                      {field.options.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={field.type || "text"}
-                      name={field.name}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none"
-                    />
-                  )}
+                <div key={field.name} className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-600">{field.label}</label>
+                  <input
+                    type={field.type || "text"}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-b border-gray-900 py-3 text-sm font-light focus:border-white outline-none transition-all"
+                  />
                 </div>
               ))}
+
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-600">Executive Status</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-gray-900 py-3 text-sm font-light focus:border-white outline-none transition-all appearance-none"
+                >
+                  <option value="" className="bg-black text-white">Select Status</option>
+                  <option value="Male" className="bg-black text-white">Active (M)</option>
+                  <option value="Female" className="bg-black text-white">Active (F)</option>
+                  <option value="Other" className="bg-black text-white">Active (NB)</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-600">Headquarters Address</label>
+                <input
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-gray-900 py-3 text-sm font-light focus:border-white outline-none transition-all"
+                />
+              </div>
             </div>
 
-            <div className="flex gap-4 mt-10">
+            <div className="flex gap-6 pt-12">
               <button
                 onClick={() => navigate("/adminprofile")}
-                className="flex-1 border border-gray-300 rounded-xl py-3 hover:bg-gray-50 transition"
+                className="flex-1 border border-gray-900 text-[10px] uppercase tracking-[0.2em] py-5 hover:border-white transition-all text-gray-500 hover:text-white"
               >
-                Cancel
+                Discard
               </button>
 
               <button
                 onClick={handleSave}
-                className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-xl py-3 hover:brightness-110 transition"
+                className="flex-1 bg-white text-black text-[10px] uppercase tracking-[0.2em] font-medium py-5 hover:bg-gray-200 transition-all shadow-2xl"
               >
-                Save Changes
+                Commit Changes
               </button>
             </div>
-          </div> 
+          </div>
         </div>
       </div>
     </div>

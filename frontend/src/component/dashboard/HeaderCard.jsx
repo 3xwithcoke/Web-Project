@@ -39,70 +39,67 @@ const HeaderCard = () => {
     : null;
     
   return (
-    <div className="w-full md:w-80 bg-gradient-to-b from-white to-pink-50 rounded-2xl shadow-lg p-6 border border-pink-100 sticky top-6">
+    <div className="w-full md:w-80 bg-black text-white rounded-none shadow-2xl p-8 border border-gray-900 sticky top-24">
 
       {/* User Info */}
-      <div className="flex flex-col items-center mb-8 pb-6 border-b border-pink-200"> 
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center overflow-hidden shadow-lg border-4 border-white"> 
+      <div className="flex flex-col items-center mb-10 pb-8 border-b border-gray-900"> 
+        <div className="w-24 h-24 rounded-full bg-gray-900 flex items-center justify-center overflow-hidden shadow-2xl border border-gray-800"> 
           {profileImage ? (
             <img
               src={profileImage}
               alt="Profile"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
               onError={(e) => (e.target.style.display = "none")}
             />
           ) : (
-            <span className="text-3xl text-white font-bold">
+            <span className="text-4xl text-gray-500 font-serif font-light">
               {user?.username?.charAt(0).toUpperCase()} 
             </span>
           )}
         </div> 
-        <h2 className="mt-3 font-bold text-gray-900 text-lg">
+        <h2 className="mt-6 font-serif font-light text-white text-xl tracking-wide uppercase">
           {user?.username}
         </h2> 
-        <p className="text-sm text-gray-600 mt-1 break-all text-center">
+        <p className="text-xs text-gray-500 mt-2 tracking-widest uppercase">
           {user?.email}
         </p> 
-        <Link to="/editprofile" className="mt-3 text-sm text-pink-600 font-semibold hover:text-pink-700 hover:underline transition">
-          Edit Profile →
+        <Link to="/editprofile" className="mt-6 text-[10px] text-gray-400 font-medium hover:text-white transition uppercase tracking-[0.2em] underline underline-offset-8">
+          Edit Profile
         </Link> 
       </div>
 
       {/* Menu Items */}
-      <div className="flex flex-col gap-2">
-        <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-gray-700 hover:text-gray-900">
-          <FaUser className="text-pink-600" /> Profile
-        </Link>
+      <div className="flex flex-col gap-1">
+        {[
+          { to: "/profile", icon: <FaUser />, label: "Profile" },
+          { to: "/wishlist", icon: <FaHeart />, label: "Wishlist" },
+          { to: "/orders", icon: <FaBoxOpen />, label: "Orders" },
+          { to: "/viewcart", icon: <FaShoppingCart />, label: "Cart" },
+          { to: "/shipping", icon: <FaTruck />, label: "Shipping" },
+        ].map((item) => (
+          <Link 
+            key={item.label}
+            to={item.to} 
+            className="flex items-center gap-4 px-4 py-4 rounded-none hover:bg-gray-900 transition font-light text-sm text-gray-400 hover:text-white uppercase tracking-widest"
+          >
+            <span className="text-gray-600 group-hover:text-white">{item.icon}</span> {item.label}
+          </Link>
+        ))}
 
-        <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-gray-700 hover:text-gray-900">
-          <FaHeart className="text-pink-600" /> Wishlist
-        </Link>
+        <div className="border-t border-gray-900 my-4"></div>
 
-        <Link to="/orders" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-gray-700 hover:text-gray-900">
-          <FaBoxOpen className="text-pink-600" /> Orders
-        </Link>
-
-        <Link to="/viewcart" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-gray-700 hover:text-gray-900">
-          <FaShoppingCart className="text-pink-600" /> Cart
-        </Link>
-
-        <Link to="/shipping" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-pink-100 transition font-medium text-gray-700 hover:text-gray-900">
-          <FaTruck className="text-pink-600" /> Shipping
-        </Link>
-
-        <div className="border-t border-pink-200 my-2"></div>
-
-        <Link to="/changepassword" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition font-medium text-red-600 hover:text-red-700">
+        <Link to="/changepassword" className="flex items-center gap-4 px-4 py-4 rounded-none hover:bg-red-950/20 transition font-light text-sm text-red-500/80 hover:text-red-500 uppercase tracking-widest">
           <FaKey /> Update Password
         </Link>
 
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition font-medium text-red-600 hover:text-red-700 w-full text-left">
+          className="flex items-center gap-4 px-4 py-4 rounded-none hover:bg-red-950/20 transition font-light text-sm text-red-500/80 hover:text-red-500 uppercase tracking-widest w-full text-left"
+        >
           <FaSignOutAlt /> Logout
         </button>
 
-        <Link to="/deleteuser" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition font-medium text-red-600 hover:text-red-700">
+        <Link to="/deleteuser" className="flex items-center gap-4 px-4 py-4 rounded-none hover:bg-red-950/20 transition font-light text-xs text-red-900 hover:text-red-600 uppercase tracking-widest">
           <FaTrash /> Delete Account
         </Link>
       </div>

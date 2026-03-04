@@ -6,7 +6,6 @@ import ViewReview from "./ViewReview";
 
 const ProductViewDetails = () => {
   const { id } = useParams();
-  console.log("PRODUCT ID:", id)
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -25,24 +24,17 @@ const ProductViewDetails = () => {
 
     const fetchRelated = async () => {
       try {
-        console.log("Fetching related products for:", { id, category: product.category });
         const res = await getRelatedProductsApi(id, product.category);
-        console.log("Related products response:", res.data);
-
         if (res.data.success) {
           setRelatedProducts(res.data.products || []);
-        } else {
-          console.error("Backend returned failure:", res.data.message);
         }
       } catch (error) {
-        console.error("Failed to load related products:", error.response?.data || error.message);
+        console.error("Failed to load related products:", error);
       }
     };
 
     fetchRelated();
   }, [product?.category, id]);
-
-
 
   const fetchProduct = async () => {
     try {
@@ -68,13 +60,7 @@ const ProductViewDetails = () => {
       const res = await addToCartApi({ productId: product.product_id, quantity });
       if (res.data.success) {
         toast.success(res.data.message, {
-          position: "bottom-right",
-          style: { background: "#db2777", color: "#fff", borderRadius: "15px" },
-        });
-      } else {
-        toast.error(res.data.message, {
-          position: "bottom-right",
-          style: { background: "#db2777", color: "#fff", borderRadius: "15px" },
+          style: { background: "#000", color: "#fff", border: "1px solid #333" },
         });
       }
     } catch (error) {
@@ -88,163 +74,152 @@ const ProductViewDetails = () => {
       const res = await addToWishListApi({ productId: product.product_id });
       if (res.data.success) {
         toast.success(res.data.message, {
-          position: "bottom-right",
-          style: { background: "#db2777", color: "#fff", borderRadius: "15px" },
+          style: { background: "#000", color: "#fff", border: "1px solid #333" },
         });
-      } else {
-        toast.error(res.data.message || "Failed to add to wishlist");
       }
     } catch (error) {
-      console.error("Wishlist error:", error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        toast.error("Please login to add to wishlist");
-        navigate("/login");
-      } else if (error.response?.status === 400) {
-        toast.error(error.response.data.message || "Bad Request");
-      } else {
-        toast.error("Something went wrong");
-      }
+      toast.error("Please login to add to wishlist");
+      navigate("/login");
     }
   };
 
-  if (loading) return <p className="text-center mt-20">Loading...</p>;
-  if (!product) return <p className="text-center mt-20">Product not found</p>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white uppercase tracking-widest">Loading Masterpiece...</div>;
+  if (!product) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Product not found</div>;
 
   const stockCount = product.stock;
-  const images = product.images?.length ? [product.thumbnail, ...product.images] : [product.thumbnail];
+  const images = (Array.isArray(product.images) && product.images.length > 0) 
+    ? product.images 
+    : [product.thumbnail];
+
+  const specs = [
+    { label: "Brand", value: product.brand },
+    { label: "Model", value: product.model },
+    { label: "Movement", value: product.movement_type },
+    { label: "Case Material", value: product.case_material },
+    { label: "Water Resistance", value: product.water_resistance },
+    { label: "Warranty", value: product.warranty },
+  ].filter(s => s.value);
 
   return (
-    <div className="min-h-screen w-full bg-pink-50 font-sans">
+    <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-white selection:text-black">
       <Toaster />
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 bg-white rounded-[2.5rem] shadow-xl p-8 md:p-12 border border-pink-100">
-          <div className="flex flex-col gap-6">
-            <div className="overflow-hidden rounded-3xl bg-white-50 aspect-square lg:aspect-auto lg:h-[600px]">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
+          
+          {/* IMAGE GALLERY */}
+          <div className="space-y-8 sticky top-32">
+            <div className="aspect-[4/5] bg-gray-950 border border-gray-900 overflow-hidden group">
               <img
                 src={mainImage}
                 alt={product.name}
-                className="w-full h-full object-contain transition duration-500 hover:scale-105"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-90"
               />
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-2">
+            <div className="grid grid-cols-4 gap-4">
               {images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
+                <div 
+                  key={i} 
                   onClick={() => setMainImage(img)}
-                  className={`w-24 h-24 rounded-2xl object-cover cursor-pointer border-2 transition ${mainImage === img ? "border-pink-600 shadow-md" : "border-transparent"
-                    }`}
-                  alt={`Product ${i}`}
-                />
+                  className={`aspect-square cursor-pointer border transition-all duration-500 overflow-hidden ${
+                    mainImage === img ? "border-white" : "border-gray-900 grayscale opacity-50 hover:opacity-100 hover:grayscale-0"
+                  }`}
+                >
+                  <img src={img} className="w-full h-full object-cover" alt={`View ${i}`} />
+                </div>
               ))}
             </div>
           </div>
 
           {/* DETAILS */}
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between">
-              <span className="text-pink-600 font-bold uppercase text-sm">{product.category}</span>
-              {stockCount > 0 ? (
-                <span className="text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold">● In Stock</span>
-              ) : (
-                <span className="text-red-600 bg-red-50 px-3 py-1 rounded-full text-xs font-bold">● Out of Stock</span>
-              )}
+          <div className="space-y-12">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-900 pb-4">
+                <span className="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-light">{product.category}</span>
+                <span className={`text-[10px] uppercase tracking-widest font-medium ${stockCount > 0 ? "text-green-500" : "text-red-500"}`}>
+                  {stockCount > 0 ? "Available for order" : "Out of stock"}
+                </span>
+              </div>
+              
+              <h1 className="text-5xl sm:text-6xl font-serif font-light tracking-tight leading-none text-white">{product.name}</h1>
+              <p className="text-2xl font-light tracking-widest text-gray-400">₹{product.price}</p>
             </div>
 
-            <h1 className="text-5xl font-bold text-pink-950 leading-tight">{product.name}</h1>
-
-            <div className="flex items-baseline gap-4">
-              <span className="text-4xl font-extrabold text-pink-700">${product.price}</span>
-              {product.oldPrice && (
-                <span className="text-pink-300 line-through text-xl">${product.oldPrice}</span>
-              )}
+            <div className="space-y-6">
+              <h3 className="text-xs uppercase tracking-[0.3em] text-gray-500 border-b border-gray-900 pb-2">The Story</h3>
+              <p className="text-gray-400 text-lg font-light leading-relaxed">{product.description}</p>
             </div>
 
-            <h3 className="text-3xl font-bold text-pink-900 mb-2">
-              Description
-            </h3>
-            <p className="text-pink-900/80 text-lg leading-relaxed">{product.description}</p>
-
-            {/* ingrediats */}
-            {product.ingredients && (
-              <div className="bg-pink-50 border border-pink-100 rounded-2xl p-6">
-                <h3 className="text-2xl font-bold text-pink-900 mb-2">
-                  Ingredients
-                </h3>
-                <p className="text-pink-800/80 leading-relaxed">
-                  {product.ingredients}
-                </p>
+            {/* TECHNICAL SPECIFICATIONS */}
+            <div className="space-y-6">
+              <h3 className="text-xs uppercase tracking-[0.3em] text-gray-500 border-b border-gray-900 pb-2">Specifications</h3>
+              <div className="grid grid-cols-2 gap-y-6 gap-x-12">
+                {specs.map((spec) => (
+                  <div key={spec.label} className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-600">{spec.label}</p>
+                    <p className="text-sm font-light text-white tracking-wide">{spec.value}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
 
-            {/* how to use*/}
-            {product.howToUse && (
-              <div className="bg-pink-50 border border-pink-100 rounded-2xl p-6">
-                <h3 className="text-2xl font-bold text-pink-900 mb-2">
-                  How to Use
-                </h3>
-                <p className="text-pink-800/80 leading-relaxed">
-                  {product.howToUse}
-                </p>
+            {/* ACTION AREA */}
+            <div className="pt-12 space-y-8">
+              <div className="flex items-center gap-12">
+                <div className="flex items-center gap-6 border-b border-gray-800 pb-2">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-gray-500 hover:text-white transition">-</button>
+                  <span className="text-sm font-light w-4 text-center">{quantity}</span>
+                  <button onClick={() => setQuantity(Math.min(stockCount, quantity + 1))} className="text-gray-500 hover:text-white transition">+</button>
+                </div>
+                <p className="text-[10px] uppercase tracking-widest text-gray-600">Select Quantity</p>
               </div>
-            )}
 
-
-            <div className="flex items-center gap-6 py-4">
-              <div className="flex items-center border-2 border-pink-100 rounded-2xl bg-white p-1">
+              <div className="flex gap-4">
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 text-pink-600 font-bold"
+                  onClick={handleAddToCart}
+                  disabled={stockCount === 0}
+                  className="flex-1 bg-white text-black text-xs font-medium uppercase tracking-[0.3em] py-5 hover:bg-gray-200 transition-all disabled:opacity-20"
                 >
-                  -
+                  Acquire Now
                 </button>
-                <span className="w-12 text-center font-bold">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(Math.min(stockCount, quantity + 1))}
-                  className="w-10 h-10 text-pink-600 font-bold"
+                  onClick={handleAddToWishlist}
+                  className="px-8 border border-gray-800 hover:border-white transition-all text-xl"
                 >
-                  +
+                  ❤️
                 </button>
               </div>
-              <button
-                onClick={handleAddToCart}
-                disabled={stockCount === 0}
-                className="flex-1 bg-pink-600 text-white font-bold py-4 rounded-2xl hover:bg-pink-700 disabled:opacity-50"
-              >
-                Add to Cart
-              </button>
-
-              <button
-                onClick={handleAddToWishlist}
-                className="text-pink-600 hover:text-pink-900"
-              >
-                ❤️
-              </button>
             </div>
           </div>
         </div>
-        <ViewReview productId={product.product_id} />
-        {relatedProducts.length > 0 && (
-          <div className="mt-24">
-            <h2 className="text-4xl font-bold text-pink-950 mb-8">
-              Related Products
-            </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {/* REVIEWS SECTION */}
+        <div className="mt-40 border-t border-gray-900 pt-20">
+          <ViewReview productId={product.product_id} />
+        </div>
+
+        {/* RELATED MASTERPIECES */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-40">
+            <h2 className="text-3xl font-serif font-light text-white mb-16 tracking-tight">Similar Masterpieces</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
               {relatedProducts.map((p) => (
                 <div
                   key={p.product_id}
                   onClick={() => navigate(`/product/${p.product_id}`)}
-                  className="bg-white rounded-2xl p-4 cursor-pointer hover:shadow-lg transition"
+                  className="group cursor-pointer space-y-4"
                 >
-                  <img
-                    src={p.thumbnail}
-                    alt={p.name}
-                    className="w-full h-32 object-cover rounded-lg mb-3"
-                  />
-                  <h3 className="font-semibold text-pink-900">{p.name}</h3>
-                  <p className="text-pink-600 font-bold">₹{p.price}</p>
+                  <div className="aspect-[4/5] bg-gray-950 border border-gray-900 overflow-hidden">
+                    <img
+                      src={p.thumbnail}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xs uppercase tracking-widest text-white font-light group-hover:text-gray-300 transition-colors">{p.name}</h3>
+                    <p className="text-[10px] text-gray-600 tracking-widest uppercase">₹{p.price}</p>
+                  </div>
                 </div>
               ))}
             </div>

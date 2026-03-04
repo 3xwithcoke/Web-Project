@@ -76,14 +76,40 @@ const Product = sequelize.define(
       defaultValue: 50,
     },
 
-    ingredients: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+    brand: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "Classic House",
     },
 
-    howToUse: {
-      type: DataTypes.TEXT,
+    model: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "Heritage Edition",
+    },
+
+    movement_type: {
+      type: DataTypes.STRING,
       allowNull: true,
+      defaultValue: "Automatic",
+    },
+
+    case_material: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Stainless Steel",
+    },
+
+    water_resistance: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "50m",
+    },
+
+    warranty: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "2 Years",
     },
   },
   {

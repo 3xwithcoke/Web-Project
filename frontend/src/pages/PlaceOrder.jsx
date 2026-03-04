@@ -6,7 +6,6 @@ import {
   saveShippingApi,
   getCartByUserApi,
   placeOrderApi,
-  clearCartApi,
 } from "../services/api";
 
 const PlaceOrder = () => {
@@ -25,30 +24,26 @@ const PlaceOrder = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // Load saved shipping & cart
   useEffect(() => {
     const fetchData = async () => {
       try {
-        //  Fetch shipping
         const shippingRes = await getSavedShippingApi();
         if (shippingRes.data.success && shippingRes.data.data) {
           setFormData(prev => ({ ...prev, ...shippingRes.data.data }));
           setShippingLoaded(true);
         }
 
-        //  Fetch cart
         const cartRes = await getCartByUserApi();
         if (cartRes.data.success) {
-          setCartItems(cartRes.data.cartItems);
-          const total = cartRes.data.cartItems.reduce(
-            (acc, item) => acc + item.quantity * item.Product.price,
+          setCartItems(cartRes.data.cartItems || []);
+          const total = (cartRes.data.cartItems || []).reduce(
+            (acc, item) => acc + item.quantity * (item.Product?.price || 0),
             0
           );
           setTotalAmount(total);
         }
       } catch (err) {
-        console.error("Failed to fetch data:", err);
-        toast.error("Failed to load checkout data");
+        console.error("Failed to fetch checkout data:", err);
       }
     };
     fetchData();
@@ -60,117 +55,139 @@ const PlaceOrder = () => {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (!cartItems.length) return toast.error("Your cart is empty!");
-    const { fullName, phone, address, city } = formData;
-    if (!fullName || !phone || !address || !city)
-      return toast.error("Complete all shipping details");
-
+    if (!cartItems.length) return toast.error("Your bag is currently empty");
+    
     setLoading(true);
-    const loadingToast = toast.loading("Processing your order...");
+    const loadingToast = toast.loading("Finalizing acquisition...", {
+      style: { background: "#000", color: "#fff", border: "1px solid #333" }
+    });
 
     try {
-      // Save shipping if not loaded
       if (!shippingLoaded) {
         await saveShippingApi(formData);
       }
 
-      // Prepare order payload
       const orderData = {
         ...formData,
         total_amount: totalAmount,
         order_items: cartItems.map(ci => ({
-          productId: ci.product_id,
+          productId: ci.Product?.product_id,
           quantity: ci.quantity,
         })),
       };
 
-      // Place order
       const response = await placeOrderApi(orderData);
       if (response.data.success) {
-        // Clear cart
-        toast.success("Order placed successfully! 🛒", { id: loadingToast });
+        toast.success("Acquisition successful", { id: loadingToast });
         setTimeout(() => navigate("/orders"), 1500);
       } else {
-        toast.error(response.data.message || "Order failed", { id: loadingToast });
+        toast.error(response.data.message || "Acquisition failed", { id: loadingToast });
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || err.message || "Order failed", { id: loadingToast });
+      toast.error(err.response?.data?.message || "Internal registry error", { id: loadingToast });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-pink-50/50 flex flex-col items-center py-12 px-6">
-      <Toaster position="top-right" />
-      <div className="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-sm p-10 md:p-14 border border-pink-100">
-        <h1 className="text-3xl font-semibold text-pink-800 mb-4 text-center">Checkout</h1>
-        <p className="text-pink-400 text-sm font-medium tracking-wide uppercase text-center mb-8">
-          Confirm your purchase
-        </p>
-
-        <form onSubmit={handlePlaceOrder} className="space-y-6">
+    <div className="min-h-screen w-full bg-black text-white selection:bg-white selection:text-black py-24 px-6">
+      <Toaster position="top-center" />
+      
+      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
+        
+        {/* Checkout Form */}
+        <div className="space-y-12">
           <div className="space-y-4">
-            {["fullName", "phone", "address", "city"].map(field => (
-              <div key={field}>
-                <label className="block text-pink-800 text-sm font-medium mb-2 ml-1">
-                  {field === "fullName" ? "Full Name" : field === "phone" ? "Phone Number" : field === "address" ? "Street Address" : "City"}
-                </label>
-                {field === "address" ? (
-                  <textarea
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleChange}
-                    rows="2"
-                    className="w-full px-6 py-4 rounded-2xl border border-pink-100 bg-pink-50/20 focus:bg-white focus:border-pink-200 outline-none"
-                  />
-                ) : (
+            <h1 className="text-4xl font-serif font-light tracking-tight italic">Checkout</h1>
+            <div className="w-12 h-[1px] bg-gray-900"></div>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Final Verification</p>
+          </div>
+
+          <form onSubmit={handlePlaceOrder} className="space-y-10">
+            <div className="space-y-8">
+              {[
+                { name: "fullName", label: "Recipient Identity" },
+                { name: "phone", label: "Primary Contact" },
+                { name: "city", label: "Locality" },
+              ].map(field => (
+                <div key={field.name} className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-600">{field.label}</label>
                   <input
-                    name={field}
-                    value={formData[field]}
+                    name={field.name}
+                    value={formData[field.name]}
                     onChange={handleChange}
-                    className="w-full px-6 py-4 rounded-2xl border border-pink-100 bg-pink-50/20 focus:bg-white focus:border-pink-200 outline-none"
+                    required
+                    className="w-full bg-transparent border-b border-gray-900 py-3 text-sm font-light focus:border-white transition-all outline-none"
                   />
-                )}
+                </div>
+              ))}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-600">Detailed Residence</label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  rows="2"
+                  required
+                  className="w-full bg-transparent border-b border-gray-900 py-3 text-sm font-light focus:border-white transition-all outline-none resize-none"
+                />
               </div>
-            ))}
+            </div>
+
+            <div className="p-6 bg-gray-950 border border-gray-900 flex justify-between items-center">
+              <span className="text-[10px] uppercase tracking-widest text-gray-600">Settlement Method</span>
+              <span className="text-xs font-light text-white uppercase tracking-widest italic">{formData.payment_method}</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-white text-black py-5 text-[10px] uppercase tracking-[0.4em] font-medium hover:bg-gray-200 transition-all shadow-2xl disabled:opacity-20"
+            >
+              {loading ? "Authenticating..." : `Place Order — ₹${totalAmount}`}
+            </button>
+          </form>
+        </div>
+
+        {/* Summary Sidebar */}
+        <div className="space-y-12">
+          <div className="space-y-4">
+            <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 border-b border-gray-900 pb-4">Acquisition Summary</h2>
+            <div className="space-y-8 max-h-[400px] overflow-y-auto pr-4 scrollbar-hide">
+              {cartItems.map((item) => (
+                <div key={item.cart_id} className="flex gap-6 items-center">
+                  <div className="w-16 h-20 bg-gray-950 border border-gray-900 overflow-hidden flex-shrink-0">
+                    {item.Product?.thumbnail && (
+                      <img src={item.Product.thumbnail} className="w-full h-full object-cover grayscale" alt={item.Product.name} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-serif font-light text-white truncate uppercase tracking-wide">{item.Product?.name}</p>
+                    <p className="text-[10px] text-gray-600 uppercase tracking-widest mt-1">Quantity: {item.quantity}</p>
+                  </div>
+                  <p className="text-xs font-light text-white">₹{(item.Product?.price || 0) * item.quantity}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="p-4 bg-pink-50/50 border border-pink-100 rounded-2xl flex items-center justify-between">
-            <span className="text-pink-700 text-sm font-medium">Payment Method:</span>
-            <span className="text-pink-500 font-bold text-sm">💵 {formData.payment_method}</span>
+          <div className="pt-8 border-t border-gray-900 space-y-4">
+            <div className="flex justify-between text-[10px] uppercase tracking-widest">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="text-white font-light">₹{totalAmount}</span>
+            </div>
+            <div className="flex justify-between text-[10px] uppercase tracking-widest">
+              <span className="text-gray-600">Insurance & Delivery</span>
+              <span className="text-green-900 italic">Complimentary</span>
+            </div>
+            <div className="flex justify-between pt-4 items-end">
+              <span className="text-xs uppercase tracking-[0.3em] text-white">Grand Total</span>
+              <span className="text-3xl font-serif font-light tracking-tighter text-white">₹{totalAmount}</span>
+            </div>
           </div>
+        </div>
 
-          <div className="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-4">
-            <h2 className="font-semibold text-pink-700 mb-2">Cart Summary</h2>
-            {cartItems.length > 0 ? (
-              <ul className="space-y-1">
-                {cartItems.map(item => (
-                  <li key={item.cart_id} className="flex justify-between text-sm text-pink-800">
-                    <span>{item.Product.name} x {item.quantity}</span>
-                    <span>Rs. {item.Product.price * item.quantity}</span>
-                  </li>
-                ))}
-                <li className="flex justify-between font-bold mt-2 text-pink-900">
-                  <span>Total</span>
-                  <span>Rs. {totalAmount}</span>
-                </li>
-              </ul>
-            ) : (
-              <p className="text-pink-400 text-sm">Cart is empty</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-5 rounded-2xl text-lg font-bold transition-all duration-300
-              ${loading ? "bg-pink-100 text-pink-300 cursor-not-allowed" : "bg-pink-200 text-pink-800 hover:bg-pink-300"}`}
-          >
-            {loading ? "Processing..." : `Place Order (Rs. ${totalAmount})`}
-          </button>
-        </form>
       </div>
     </div>
   );

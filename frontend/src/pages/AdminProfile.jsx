@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AdminCard from "../component/dashboard/AdminCard";
 import { getProfileApi } from "../services/api";
 
 const AdminProfile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -25,93 +23,70 @@ const AdminProfile = () => {
         setUser(data);
         localStorage.setItem("user", JSON.stringify(data));
       } catch (error) {
-        toast.error("Failed to load profile");
-        console.error("PROFILE LOAD ERROR:", error.response?.data);
+        toast.error("Failed to load executive profile");
       }
     };
     fetchProfile();
   }, []);
-  useEffect(() => {
-    const handleUserUpdate = () => {
-      const localUser = localStorage.getItem("user");
-      if (localUser) setUser(JSON.parse(localUser));
-    };
-
-    window.addEventListener("userUpdated", handleUserUpdate);
-    return () =>
-      window.removeEventListener("userUpdated", handleUserUpdate);
-  }, []);
-
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-
-        <div className="md:w-1/4">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black py-20 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+        <div className="md:w-80 flex-shrink-0">
           <AdminCard />
         </div>
 
-        <div className="md:w-3/4 space-y-6">
-          <div className="bg-gradient-to-r from-pink-400 to-purple-400 rounded-2xl p-8 text-white flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-white/30 relative">
+        <div className="flex-1 space-y-12">
+          <div className="bg-gray-950 border border-gray-900 p-10 flex items-center gap-10">
+            <div className="w-24 h-32 bg-gray-900 border border-gray-800 overflow-hidden">
               <img
                 src={
                   user.profilePicture
                     ? `${import.meta.env.VITE_API_BASE_URL}${user.profilePicture}?t=${Date.now()}`
                     : "/src/assets/user.png"
                 }
-                alt="Profile"
-                className="w-full h-full object-cover rounded-full"
+                alt="Executive"
+                className="w-full h-full object-cover grayscale"
               />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">{user.username || "Full Name"}</h1>
-              <p className="opacity-90">{user.email || "Email Address"}</p>
+            <div className="space-y-2">
+              <h1 className="text-4xl font-serif font-light tracking-tight italic">{user.username || "System Executive"}</h1>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Chronos Luxe Administrator</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-md p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-semibold">Personal Information</h2>
+          <div className="bg-black border border-gray-900 p-10 space-y-12">
+            <div className="flex justify-between items-end border-b border-gray-900 pb-4">
+              <h2 className="text-xs uppercase tracking-[0.4em] text-gray-500 font-medium">Security Credentials</h2>
               <button
                 onClick={() => navigate("/admineditprofile")}
-                className="text-pink-500 font-medium hover:underline"
+                className="text-[10px] uppercase tracking-widest text-white hover:text-gray-400 transition underline underline-offset-8"
               >
-                Edit
+                Modify Identity
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {[
-                { label: "Username", icon: "👤", value: user.username },
-                { label: "Email", icon: "📧", value: user.email },
-                { label: "Phone Number", icon: "📞", value: user.phoneNumber },
-                { label: "Date of Birth", icon: "🎂", value: user.dob },
-                { label: "Gender", icon: "⚧", value: user.gender },
-              ].map(({ label, icon, value }) => (
-                <div key={label}>
-                  <label className="text-gray-500 text-sm flex items-center gap-2 mb-1">
-                    {icon} {label}
-                  </label>
-                  <input
-                    type="text"
-                    value={value || "-"}
-                    readOnly
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 bg-gray-50 focus:outline-none"
-                  />
+                { label: "Identity", value: user.username },
+                { label: "Authorized Email", value: user.email },
+                { label: "Direct Channel", value: user.phoneNumber },
+                { label: "Origin Date", value: user.dob },
+                { label: "Status", value: user.gender },
+              ].map(({ label, value }) => (
+                <div key={label} className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-600">{label}</label>
+                  <p className="text-sm font-light text-gray-300 tracking-wide border-b border-gray-900/50 pb-2">
+                    {value || "—"}
+                  </p>
                 </div>
               ))}
 
-              <div className="md:col-span-2">
-                <label className="text-gray-500 text-sm flex items-center gap-2 mb-1">
-                  📍 Address
-                </label>
-                <input
-                  type="text"
-                  value={user.address || "-"}
-                  readOnly
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 bg-gray-50 focus:outline-none"
-                />
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-600">Headquarters Address</label>
+                <p className="text-sm font-light text-gray-300 tracking-wide border-b border-gray-900/50 pb-2">
+                  {user.address || "—"}
+                </p>
               </div>
             </div>
           </div>

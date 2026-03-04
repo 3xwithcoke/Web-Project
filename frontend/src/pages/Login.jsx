@@ -28,37 +28,27 @@ const Login = () => {
       toast.error("Password is required");
       return false;
     }
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return false;
-    }
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     try {
       const response = await loginUser(formData);
-
       if (!response?.data?.token) {
         return toast.error(response?.data?.message || "Login failed");
       }
 
       localStorage.setItem("token", response.data.token);
-      toast.success(response.data.message || "Login successful");
+      toast.success(response.data.message || "Welcome back");
 
       const decoded = jwtDecode(response.data.token);
 
-      // Fetch and store complete profile after login
       try {
         const profileRes = await getProfileApi();
-        console.log("Profile response:", profileRes.data);
-        
         if (profileRes.data) {
-          // Store the entire profile data or extract specific fields
           const profileData = profileRes.data.user || {
             user_id: profileRes.data.user_id,
             username: profileRes.data.username,
@@ -66,100 +56,94 @@ const Login = () => {
             profilePicture: profileRes.data.profilePicture || "",
           };
           localStorage.setItem("user", JSON.stringify(profileData));
-          console.log("Profile stored in localStorage:", profileData);
-          
-          // Dispatch event to trigger HeaderCard/AdminCard update
           window.dispatchEvent(new Event("userUpdated"));
         }
       } catch (profileError) {
-        console.error("Failed to fetch profile:", profileError?.response?.data || profileError);
-        // Continue with login even if profile fetch fails
+        console.error("Failed to fetch profile:", profileError);
       }
 
       window.dispatchEvent(new Event("userLogin"));
 
       if (decoded.role === "admin") {
-        // Add small delay to ensure localStorage is updated and event is captured
-        setTimeout(() => {
-          navigate("/admindash", { replace: true });
-        }, 100);
+        setTimeout(() => navigate("/admindash", { replace: true }), 100);
       } else {
         navigate("/userdash", { replace: true });
         window.location.reload();
       }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      toast.error(error?.response?.data?.message || "Authentication failed");
     }
   };
 
-  
   return (
-    <div className="flex min-h-screen">
-      <div className="flex-1 bg-gray-900 text-white flex flex-col justify-center items-center p-10 relative">
-        <h1 className="text-4xl font-bold mb-6 text-center">Manage your beauty</h1>
-        <p className="text-center mb-10">Global beauty solutions made simple</p>
+    <div className="flex min-h-screen bg-black text-white font-sans">
+      <div className="hidden lg:flex flex-1 bg-gray-950 flex-col justify-center items-center p-20 relative border-r border-gray-900 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black z-0 opacity-60"></div>
         <img
-          src="\src\assets\bg.jpg"
-          alt="App preview"
-          className="w-72 md:w-96"
+          src="https://images.unsplash.com/photo-1508685096489-77a46807e624?q=80&w=1000&auto=format&fit=crop"
+          alt="Luxury Watch"
+          className="w-full h-full object-cover absolute inset-0 z-[-1] grayscale opacity-30"
         />
+        <div className="relative z-10 text-center space-y-6">
+          <h1 className="text-6xl font-serif font-light tracking-tighter italic">Chronos Luxe</h1>
+          <p className="text-gray-500 uppercase tracking-[0.3em] text-xs">Excellence in every second</p>
+        </div>
       </div>
       
-      <div className="flex-1 flex flex-col justify-center items-center p-10 bg-white rounded-l-3xl shadow-lg">
-        <div className="w-full max-w-md">
-          <h2 className="text-3xl font-semibold mb-6">Sign In</h2>
+      <div className="flex-1 flex flex-col justify-center items-center p-10 bg-black">
+        <div className="w-full max-w-sm space-y-12">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-serif font-light tracking-tight">Sign In</h2>
+            <p className="text-gray-500 text-xs uppercase tracking-widest font-light">Enter your credentials to access your collection</p>
+          </div>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full bg-gray-950 border border-gray-900 rounded-none px-4 py-4 text-sm focus:border-white transition-colors outline-none"
                 required
               />
             </div>
 
-            <div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-gray-500 ml-1">Password</label>
               <input
                 type="password"
                 name="password"
-                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full bg-gray-950 border border-gray-900 rounded-none px-4 py-4 text-sm focus:border-white transition-colors outline-none"
                 required
               />
             </div>
 
             <div className="text-right">
-              <a href="/forgotpassword" className="text-pink-500 hover:underline text-sm">
-                Forgot password?
-              </a>
+              <Link to="/forgotpassword" weight="light" className="text-gray-500 hover:text-white transition text-[10px] uppercase tracking-widest">
+                Forgot heritage?
+              </Link>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-pink-400 text-white py-3 rounded-lg hover:opacity-90 transition"
+              className="w-full bg-white text-black py-4 font-medium uppercase tracking-[0.2em] text-xs hover:bg-gray-200 transition-all duration-500 shadow-2xl"
             >
-              Sign In
+              Enter Vault
             </button>
           </form>
 
-         <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            New here?{" "}
-            <Link
-              to="/register"
-              className="text-pink-500 hover:underline"
-            >
-              Create an account
-            </Link>
-          </p>
-        </div>
+          <div className="pt-6 text-center">
+            <p className="text-gray-600 text-[10px] uppercase tracking-widest">
+              New to the legacy?{" "}
+              <Link to="/register" className="text-white hover:underline underline-offset-4 ml-2">
+                Create Account
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

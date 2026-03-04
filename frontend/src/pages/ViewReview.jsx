@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";  // ✅ Remove useParams
+import { useNavigate } from "react-router-dom";
 import { getProductReviewsApi, deleteReviewApi } from "../services/api";
 import toast from "react-hot-toast";
+import { FaTrash, FaEdit, FaStar } from "react-icons/fa";
 
-const ViewReview = ({ productId }) => {  // ✅ Accept productId as prop
+const ViewReview = ({ productId }) => {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
-  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   useEffect(() => {
-    if (!productId) return;  // ✅ Guard clause
+    if (!productId) return;
     
     const fetchReviews = async () => {
       try {
@@ -19,7 +19,6 @@ const ViewReview = ({ productId }) => {  // ✅ Accept productId as prop
         setReviews(res.data.reviews || []);
       } catch (error) {
         console.error("Failed to load reviews", error);
-        // Don't show error toast - reviews are optional
       } finally {
         setLoading(false);
       }
@@ -28,54 +27,23 @@ const ViewReview = ({ productId }) => {  // ✅ Accept productId as prop
     fetchReviews();
   }, [productId]);
 
-  const handleDeleteReview = (reviewId) => {
-    setPendingDeleteId(reviewId);
-    toast.custom((t) => (
-      <div className="bg-yellow-600 text-white p-4 rounded-lg shadow-lg flex gap-3 items-center">
-        <span>⚠️ Delete this review?</span>
-        <div className="flex gap-2">
-          <button
-            onClick={() => confirmDelete(reviewId)}
-            className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm font-semibold"
-          >
-            Yes
-          </button>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-              setPendingDeleteId(null);
-            }}
-            className="bg-gray-500 hover:bg-gray-600 px-3 py-1 rounded text-sm font-semibold"
-          >
-            No
-          </button>
-        </div>
-      </div>
-    ), { duration: 10000 });
-  };
-
   const confirmDelete = async (reviewId) => {
+    if(!window.confirm("Purge this testimonial from the archives?")) return;
     try {
       setDeletingId(reviewId);
       const res = await deleteReviewApi(reviewId);
       if (res.data.success) {
-        toast.success("Review deleted successfully!");
+        toast.success("Testimonial removed");
         setReviews(reviews.filter(r => r.review_id !== reviewId));
-        toast.dismiss();
-        setPendingDeleteId(null);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete review");
+      toast.error(error.response?.data?.message || "Failed to remove review");
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleEditReview = (reviewId) => {
-    navigate(`/editreview/${reviewId}`);
-  };
-
-  if (!productId) return null;  // ✅ Don't render if no productId
+  if (!productId) return null;
 
   const averageRating =
     reviews.length > 0
@@ -85,23 +53,22 @@ const ViewReview = ({ productId }) => {  // ✅ Accept productId as prop
       : 0;
 
   return (
-    <div className="mt-24 bg-white rounded-[3rem] p-10 shadow-sm border border-pink-100">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
-        <div>
-          <h2 className="text-4xl font-bold text-pink-950 mb-2">
-            Verified Reviews
+    <div className="mt-40 space-y-16 selection:bg-white selection:text-black">
+      <div className="flex flex-col md:flex-row justify-between items-end border-b border-gray-900 pb-8 gap-8">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-serif font-light tracking-tight italic text-white">
+            Client Testimonials
           </h2>
 
           {reviews.length > 0 && (
-            <div className="flex items-center gap-3">
-              <div className="flex text-yellow-400 text-2xl">
-                {"★".repeat(Math.round(averageRating))}
+            <div className="flex items-center gap-6">
+              <div className="flex text-white text-xs gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <FaStar key={i} className={i < Math.round(averageRating) ? "text-white" : "text-gray-800"} />
+                ))}
               </div>
-              <span className="font-bold text-pink-900">
-                {averageRating} / 5.0
-              </span>
-              <span className="text-pink-500 text-sm">
-                ({reviews.length} Reviews)
+              <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500">
+                {averageRating} Average / {reviews.length} Appraisals
               </span>
             </div>
           )}
@@ -109,62 +76,62 @@ const ViewReview = ({ productId }) => {  // ✅ Accept productId as prop
 
         <button
           onClick={() => navigate(`/addreview/${productId}`)}
-          className="bg-pink-50 text-pink-700 px-6 py-3 rounded-xl font-bold hover:bg-pink-100 transition"
+          className="bg-white text-black px-10 py-4 text-[10px] uppercase tracking-[0.3em] font-medium hover:bg-gray-200 transition-all shadow-2xl"
         >
-          Write a Review
+          Submit Appraisal
         </button>
       </div>
 
       {loading ? (
-        <p className="text-center text-pink-600">Loading reviews...</p>
+        <div className="flex items-center gap-4 py-20 text-gray-600">
+           <div className="w-4 h-4 border-t border-gray-600 rounded-full animate-spin"></div>
+           <span className="text-[10px] uppercase tracking-widest">Inquiring Archives...</span>
+        </div>
       ) : reviews.length === 0 ? (
-        <p className="text-center text-pink-600 text-lg font-medium">
-          No reviews yet. Be the first to review!
-        </p>
+        <div className="py-20 text-center border border-gray-900 border-dashed">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-700 italic">No testimonials recorded for this masterpiece</p>
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {reviews.map((review) => (
             <div
               key={review.review_id}
-              className="p-6 bg-pink-50 border border-pink-100 rounded-2xl hover:shadow-md transition"
+              className="group bg-gray-950/20 border border-gray-900 p-10 space-y-6 hover:border-gray-600 transition-all duration-700"
             >
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-bold text-pink-900">
-                    {review.User?.username || `User #${review.user_id}`}
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-serif font-light text-white uppercase tracking-wide">
+                    {review.User?.username || `Member #${review.user_id}`}
                   </h4>
-                  <span className="text-sm text-pink-500">
-                    {new Date(review.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
+                  <p className="text-[9px] text-gray-600 uppercase tracking-widest">
+                    {new Date(review.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
                 </div>
-                <div className="flex gap-2 items-center">
-                  <div className="text-yellow-400 text-lg flex gap-1">
-                    {"★".repeat(review.rating)}
-                    {"☆".repeat(5 - review.rating)}
+                <div className="flex flex-col items-end gap-4">
+                  <div className="flex text-[10px] gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar key={i} className={i < review.rating ? "text-white" : "text-gray-900"} />
+                    ))}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <button
-                      onClick={() => handleEditReview(review.review_id)}
-                      className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                      onClick={() => navigate(`/editreview/${review.review_id}`)}
+                      className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
                     >
-                      Edit
+                      Modify
                     </button>
                     <button
-                      onClick={() => handleDeleteReview(review.review_id)}
+                      onClick={() => confirmDelete(review.review_id)}
                       disabled={deletingId === review.review_id}
-                      className="text-red-600 hover:text-red-800 font-semibold text-sm disabled:opacity-50"
+                      className="text-[10px] uppercase tracking-widest text-red-900 hover:text-red-600 transition-colors"
                     >
-                      {deletingId === review.review_id ? "Deleting..." : "Delete"}
+                      Purge
                     </button>
                   </div>
                 </div>
               </div>
 
-              <p className="text-pink-900 leading-relaxed">{review.comment}</p>
+              <p className="text-gray-400 font-light text-sm leading-relaxed italic">"{review.comment}"</p>
             </div>
           ))}
         </div>

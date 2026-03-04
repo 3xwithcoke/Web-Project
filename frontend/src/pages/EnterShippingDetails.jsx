@@ -16,7 +16,6 @@ const EnterShippingDetails = () => {
     city: "",
   });
 
-  // Load saved shipping if available
   useEffect(() => {
     const fetchShipping = async () => {
       try {
@@ -39,98 +38,93 @@ const EnterShippingDetails = () => {
   const handleSaveDetails = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const loadingToast = toast.loading("Saving shipping details...");
+    const loadingToast = toast.loading("Processing your request...", {
+      style: { background: "#000", color: "#fff", border: "1px solid #333" }
+    });
 
     try {
-      // Save shipping details
       const response = await saveShippingApi(formData);
-
       if (response.data.success) {
-        toast.success(response.data.message || "Details saved! ✨", { id: loadingToast });
+        toast.success("Shipping details secured", { id: loadingToast });
         setTimeout(() => navigate("/placeorders"), 1200);
       } else {
-        toast.error(response.data.message || "Failed to save shipping", { id: loadingToast });
+        toast.error(response.data.message || "Failed to save details", { id: loadingToast });
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || err.message || "Failed to save shipping", { id: loadingToast });
+      toast.error("An error occurred during preservation", { id: loadingToast });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-pink-50 via-white to-pink-50 px-4 sm:px-6 md:px-8 py-8 md:py-12">
-      <Toaster position="top-right" />
-      <div className="max-w-7xl mx-auto">
-        {/* Page Title */}
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-            📦 Shipping <span className="text-pink-600">Details</span>
-          </h1>
-          <p className="text-gray-600 mt-2">Enter your delivery address</p>
+    <div className="min-h-screen w-full bg-black text-white selection:bg-white selection:text-black py-20">
+      <Toaster position="top-center" />
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-20 text-center space-y-4">
+          <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tight italic">Delivery Residence</h1>
+          <div className="w-24 h-[1px] bg-gray-900 mx-auto"></div>
+          <p className="text-xs text-gray-600 uppercase tracking-widest pt-2">Specify where your acquisitions should be delivered</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 h-fit">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
+          <div className="lg:col-span-1">
             <HeaderCard />
           </div>
 
-          {/* Form */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
-              <form onSubmit={handleSaveDetails} className="space-y-6">
-                {["fullName", "phone", "address", "city"].map(field => (
-                  <div key={field} className="space-y-2">
-                    <label className="block text-gray-900 font-bold text-lg">
-                      {field === "fullName" ? "👤 Full Name" : field === "phone" ? "📞 Phone Number" : field === "address" ? "🏠 Street Address" : "🏙️ City"}
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    {field === "address" ? (
-                      <textarea
-                        name={field}
-                        value={formData[field]}
-                        onChange={handleChange}
-                        rows="3"
-                        required
-                        placeholder={`Enter ${field}`}
-                        className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none bg-gray-50 hover:bg-white transition font-medium"
-                      />
-                    ) : (
+            <div className="bg-gray-950 border border-gray-900 p-10 md:p-16">
+              <form onSubmit={handleSaveDetails} className="space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {[
+                    { id: "fullName", label: "Full Identity", type: "text" },
+                    { id: "phone", label: "Primary Contact", type: "tel" },
+                    { id: "city", label: "Locality", type: "text" },
+                  ].map(field => (
+                    <div key={field.id} className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-gray-600">
+                        {field.label} <span className="text-gray-800 ml-1">*</span>
+                      </label>
                       <input
-                        name={field}
-                        value={formData[field]}
+                        name={field.id}
+                        value={formData[field.id]}
                         onChange={handleChange}
-                        type={field === "phone" ? "tel" : "text"}
+                        type={field.type}
                         required
-                        placeholder={`Enter ${field}`}
-                        className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none bg-gray-50 hover:bg-white transition font-medium"
+                        className="w-full bg-transparent border-b border-gray-900 py-4 text-sm font-light focus:border-white transition-all outline-none"
                       />
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </div>
 
-                <div className="pt-6 border-t border-gray-200">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-600">
+                    Detailed Residence Address <span className="text-gray-800 ml-1">*</span>
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    rows="3"
+                    required
+                    className="w-full bg-transparent border-b border-gray-900 py-4 text-sm font-light focus:border-white transition-all outline-none resize-none"
+                  />
+                </div>
+
+                <div className="pt-12 border-t border-gray-900">
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full py-4 rounded-xl text-lg font-bold transition transform active:scale-95 ${
-                      loading
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-gradient-to-r from-pink-600 to-pink-700 text-white hover:from-pink-700 hover:to-pink-800 shadow-lg hover:shadow-xl"
-                    }`}
+                    className="w-full bg-white text-black py-5 text-xs font-medium uppercase tracking-[0.3em] hover:bg-gray-200 transition-all shadow-2xl disabled:opacity-20"
                   >
-                    {loading ? "⏳ Saving..." : "✓ Save & Continue"}
+                    {loading ? "Preserving..." : "Confirm & Proceed to Checkout"}
                   </button>
                 </div>
 
                 {shippingLoaded && (
-                  <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl">
-                    <p className="text-green-700 font-semibold flex items-center gap-2">
-                      ✓ Previous details loaded. Update if needed.
-                    </p>
-                  </div>
+                  <p className="text-[10px] uppercase tracking-widest text-gray-700 text-center">
+                    Authenticated residence records loaded
+                  </p>
                 )}
               </form>
             </div>
